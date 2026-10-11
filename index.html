@@ -105,6 +105,7 @@ legend{font-weight:700;margin-bottom:8px;padding:0}
 .badges{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
 .badge{border:2px solid var(--gold);border-radius:999px;padding:5px 12px;font-size:14px;font-weight:600}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.tabs{display:flex;gap:6px;margin:8px 0 4px;flex-wrap:wrap}
 .rank{list-style:none;margin:8px 0 0;padding:0}
 .rank li{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
 .rank li.me{font-weight:800}
@@ -318,6 +319,12 @@ function grade(score) {
   return 'Inflação Fora de Controle';
 }
 // ENGINE_END
+// ---------- Ranking global (Supabase) ----------
+// Preencha as duas linhas abaixo depois de criar o projeto no Supabase. Vazio = só ranking local.
+const SB_URL = 'https://sogfjgqftcepagvgcxhj.supabase.co/functions/v1/super-responder';   // ex.: https://abcdefgh.supabase.co
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvZ2ZqZ3FmdGNlcGFndmdjeGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE3MjA1NzksImV4cCI6MjEwNzI5NjU3OX0.4xwwSF8MU0Zjzu1buk1p6WPHE7a50JBx0anKUy9ZfUM';   // chave "anon" ou "publishable" (pode ficar no código; ela é pública)
+const SB_FN = 'super-responder';   // trecho final da URL da função (o painel pode gerar outro, ex.: super-response)
+
 // ---------- UI ----------
 const $ = (sel, el = document) => el.querySelector(sel);
 const app = $('#app');
@@ -332,6 +339,48 @@ const RANK_KEY = 'copomgame.ranking.v1';
 const loadRank = () => { try { return JSON.parse(localStorage.getItem(RANK_KEY)) || []; } catch (e) { return []; } };
 const saveRank = r => { try { localStorage.setItem(RANK_KEY, JSON.stringify(r)); } catch (e) {} };
 
+const GLOBAL = !!(SB_URL && SB_KEY);
+const playerId = (() => {
+  try {
+    let id = localStorage.getItem('copomgame.pid');
+    if (!id) { id = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); localStorage.setItem('copomgame.pid', id); }
+    return id;
+  } catch (e) { return 'anon-' + Math.random().toString(36).slice(2) + Date.now(); }
+})();
+const sbHeaders = () => { const h = { apikey: SB_KEY }; if (SB_KEY.startsWith('eyJ')) h.Authorization = 'Bearer ' + SB_KEY; return h; };
+async function fetchBoard(seed) {
+  const q = `${SB_URL}/rest/v1/scores?select=name,score,grade,seed&order=score.desc,created_at.asc&limit=10` + (seed ? `&seed=eq.${seed}` : '');
+  const r = await fetch(q, { headers: sbHeaders() });
+  if (!r.ok) throw new Error('board');
+  return r.json();
+}
+async function submitGlobal(name) {
+  try {
+    const r = await fetch(`${SB_URL}/functions/v1/${SB_FN}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', ...sbHeaders() },
+      body: JSON.stringify({ name, playerId, seed: G.seed, veteran: G.veteran, decisions: G.decisions }),
+    });
+    const j = await r.json().catch(() => ({}));
+    return { ok: r.ok, status: r.status, ...j };
+  } catch (e) { return { ok: false, error: 'Sem conexão com o ranking.' }; }
+}
+function mountBoard(el, title, tabs, active = 0, mine = null) {
+  if (!el) return;
+  el.innerHTML = `<h3>${title}</h3><div class="tabs">${tabs.map((t, i) => `<button class="btn small ${i === active ? 'sel' : ''}" data-i="${i}">${t.label}</button>`).join('')}</div><ol class="rank"></ol>`;
+  const list = $('.rank', el);
+  const load = async i => {
+    el.querySelectorAll('.tabs .btn').forEach(b => b.classList.toggle('sel', +b.dataset.i === i));
+    list.innerHTML = '<li><span>Carregando…</span></li>';
+    try {
+      const rows = await fetchBoard(tabs[i].seed);
+      list.innerHTML = rows.length ? rows.map((x, k) => `<li class="${mine && x.name === mine.name && x.score === mine.score && x.seed === mine.seed ? 'me' : ''}"><span>${k + 1}. ${esc(x.name)} · ${esc(x.grade)}</span><span>${x.score} pts${tabs[i].seed ? '' : ' · #' + x.seed}</span></li>`).join('')
+        : '<li><span>Ninguém jogou ainda. Seja o primeiro.</span></li>';
+    } catch (e) { list.innerHTML = '<li><span>Não foi possível carregar o ranking agora.</span></li>'; }
+  };
+  $('.tabs', el).onclick = e => { const b = e.target.closest('button'); if (b) load(+b.dataset.i); };
+  load(active);
+}
+
 function drawTicks() {
   const el = $('#ticks');
   if (!G) { el.innerHTML = ''; return; }
@@ -341,7 +390,7 @@ function drawTicks() {
 }
 
 function startGame(seed, veteran) {
-  G = { seed, veteran, scs: pickScenarios(seed), rng: mulberry32(seed), s: initialState(), hist: [], idx: 0, phase: 'decide', ctx: { used: new Set(), last: -9 }, series: [{ selic: 13.75, ipca: 4.4, exp: 4.3 }] };
+  G = { seed, veteran, scs: pickScenarios(seed), rng: mulberry32(seed), s: initialState(), hist: [], decisions: [], idx: 0, phase: 'decide', ctx: { used: new Set(), last: -9 }, series: [{ selic: 13.75, ipca: 4.4, exp: 4.3 }] };
   renderRound();
 }
 
@@ -406,7 +455,9 @@ function renderStart() {
     <div class="card"><h3>Como se pontua</h3><p>Até 100 pontos por reunião: inflação e expectativas, atividade, credibilidade e estabilidade do câmbio. A nota final vai de 0 a 1000.</p></div>
     <div class="card"><h3>Atenção às defasagens</h3><p>Os juros demoram a fazer efeito. Quem reage tarde demais, ou exagera, paga a conta nas reuniões seguintes.</p></div>
   </section>
+  ${GLOBAL ? '<section class="card" id="gstart" style="margin-top:20px"></section>' : ''}
   ${rankHtml(null)}`;
+  if (GLOBAL) mountBoard($('#gstart'), 'Ranking global', [{ label: 'Desafio de hoje', seed: daily }, { label: 'Geral', seed: null }]);
   $('#m-daily').onclick = () => startGame(daily, $('#vet').checked);
   $('#m-rand').onclick = () => startGame(100000 + Math.floor(Math.random() * 899999), $('#vet').checked);
   $('#m-seed').onclick = () => { const v = parseInt($('#seedin').value, 10); if (!v) return toast('Digite um código numérico'); startGame(v, $('#vet').checked); };
@@ -466,6 +517,7 @@ function renderRound() {
 }
 
 function decide() {
+  G.decisions.push({ selic: G.choice, tone: G.tone });
   const prev = G.s, sc = G.scs[G.idx];
   const r = step(prev, G.choice, G.tone, sc, G.rng);
   G.s = r.state;
@@ -570,8 +622,8 @@ function renderFinal() {
         <button class="btn" id="img">Baixar imagem</button>
         <button class="btn" id="again">Jogar de novo</button>
       </div>
-      <div class="seedrow" style="margin-top:18px"><input id="nm" maxlength="20" placeholder="Seu nome para o ranking" aria-label="Seu nome"><button class="btn" id="save">Salvar</button></div>
-      <div id="rk">${rankHtml(null)}</div>
+      <div class="seedrow" style="margin-top:18px"><input id="nm" maxlength="20" placeholder="Seu nome para o ranking" aria-label="Seu nome"><button class="btn" id="save">${GLOBAL ? 'Enviar ao ranking' : 'Salvar'}</button></div>
+      <div id="gb" style="margin-top:20px"></div><div id="rk">${rankHtml(null)}</div>
     </section>
     <section>
       <div class="stats">
@@ -587,6 +639,7 @@ function renderFinal() {
       </tbody></table>
     </section>
   </div>`;
+  if (GLOBAL) mountBoard($('#gb'), 'Ranking global', [{ label: 'Este desafio #' + G.seed, seed: G.seed }, { label: 'Geral', seed: null }]);
   $('#again').onclick = renderStart;
   $('#share').onclick = async () => {
     const text = shareText(f, g);
@@ -594,12 +647,17 @@ function renderFinal() {
     try { await navigator.clipboard.writeText(text); toast('Texto copiado'); } catch (e) { prompt('Copie o texto:', text); }
   };
   $('#img').onclick = () => cardImage(f, g).toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'copom-resultado-' + G.seed + '.png'; a.click(); });
-  $('#save').onclick = () => {
+  $('#save').onclick = async () => {
     const name = ($('#nm').value || 'Anônimo').trim().slice(0, 20) || 'Anônimo';
+    const btn = $('#save'); btn.disabled = true;
     const r = loadRank(); r.push({ name, score: f.score, grade: g, seed: G.seed, date: Date.now() }); saveRank(r);
     const sorted = r.slice().sort((a, b) => b.score - a.score).slice(0, 10);
     const idx = sorted.findIndex(x => x.name === name && x.score === f.score && x.seed === G.seed);
-    $('#rk').innerHTML = rankHtml(idx); $('#save').disabled = true; toast('Salvo no ranking');
+    $('#rk').innerHTML = rankHtml(idx);
+    if (!GLOBAL) { toast('Salvo no ranking'); return; }
+    const res = await submitGlobal(name);
+    if (res.ok) { toast('Enviado ao ranking global'); mountBoard($('#gb'), 'Ranking global', [{ label: 'Este desafio #' + G.seed, seed: G.seed }, { label: 'Geral', seed: null }], 0, { name, score: res.score, seed: G.seed }); }
+    else { toast(res.error || 'Não foi possível enviar'); if (res.status !== 409) btn.disabled = false; }
   };
   window.scrollTo({ top: 0 });
 }
