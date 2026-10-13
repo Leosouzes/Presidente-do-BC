@@ -4,127 +4,222 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Copom: você decide a Selic</title>
+<script>try{var t=localStorage.getItem('copomgame.theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Newsreader:opsz,wght@6..72,400..700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper:#E6ECE2; --card:#F5F8F1; --ink:#13292B; --muted:#587072; --teal:#0F5C57; --teal-ink:#F5F8F1;
-  --gold:#D9A21B; --red:#B3342B; --green:#2E7D4F; --line:#C5D1C3;
+  --paper:#E9EEE4; --card:#F7F9F3; --raised:#FFFFFF; --ink:#12282A; --muted:#546D6E; --teal:#0F5C57; --teal-ink:#F4F8F2;
+  --gold:#D9A21B; --red:#B3342B; --green:#2E7D4F; --line:#C9D4C7; --glow:rgba(15,92,87,.12);
   --display:'Archivo','Helvetica Neue',Arial,sans-serif; --serif:'Newsreader',Georgia,'Times New Roman',serif;
 }
-@media (prefers-color-scheme:dark){
-  :root{--paper:#0F1C1D;--card:#162728;--ink:#E3EDE6;--muted:#8FA9A8;--teal:#52C2B6;--teal-ink:#0F1C1D;--gold:#E8B84A;--red:#F07A6E;--green:#6FCB94;--line:#294042}
+:root[data-theme=dark]{
+  --paper:#0C1819; --card:#132526; --raised:#193133; --ink:#E6EFE8; --muted:#93ABAA; --teal:#4FC3B5; --teal-ink:#0C1819;
+  --gold:#EAB94B; --red:#F27C70; --green:#6FCB94; --line:#264345; --glow:rgba(79,195,181,.14);
 }
 *{box-sizing:border-box}
-html{scroll-padding-top:12px}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--display);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+html{scroll-padding-top:12px;color-scheme:light dark}
+body{margin:0;background:var(--paper);background-image:radial-gradient(900px 420px at 90% -8%,var(--glow),transparent);background-repeat:no-repeat;color:var(--ink);font-family:var(--display);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;cursor:pointer}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-.wrap{max-width:1080px;margin:0 auto;padding:16px 16px 48px}
-header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 0 16px;border-bottom:2px solid var(--ink);margin-bottom:20px;flex-wrap:wrap}
-.brand{font-weight:800;font-stretch:110%;font-size:20px;letter-spacing:-.01em}
-.ticks{display:flex;gap:6px;align-items:center}
-.tick{width:26px;height:10px;border:2px solid var(--ink);border-radius:2px;background:transparent}
-.tick.done{background:var(--teal);border-color:var(--teal)}
-.tick.now{background:var(--gold);border-color:var(--ink)}
-.ticklabel{font-size:14px;color:var(--muted);margin-right:8px}
+.wrap{max-width:1080px;margin:0 auto;padding:16px 16px 56px}
 h1,h2,h3{margin:0;line-height:1.05}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px 16px;padding:8px 0 14px;border-bottom:2px solid var(--ink);margin-bottom:22px;flex-wrap:wrap}
+.brand{font-weight:800;font-stretch:112%;font-size:20px;letter-spacing:-.01em}
+.hdr-right{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.ticks{display:flex;gap:5px;align-items:center}
+.tick{width:24px;height:9px;border:2px solid var(--ink);border-radius:2px}
+.tick.done{background:var(--teal);border-color:var(--teal)}
+.tick.now{background:var(--gold)}
+.ticklabel{font-size:14px;color:var(--muted);margin-right:8px}
+.tools{display:flex;gap:6px}
+.icon-btn{border:2px solid var(--line);background:transparent;border-radius:8px;height:36px;min-width:36px;padding:0 10px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.icon-btn:hover{border-color:var(--ink)}
 .btn{border:2px solid var(--ink);background:transparent;border-radius:8px;padding:10px 16px;font-weight:700}
 .btn:hover{background:var(--ink);color:var(--paper)}
-.btn.primary{background:var(--teal);border-color:var(--teal);color:var(--teal-ink);padding:14px 22px;font-size:18px;font-stretch:105%}
-.btn.primary:hover{filter:brightness(1.12);background:var(--teal);color:var(--teal-ink)}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:var(--teal-ink);padding:15px 22px;font-size:18px;font-stretch:105%;width:100%}
+.btn.primary:hover{filter:brightness(1.1);background:var(--teal);color:var(--teal-ink)}
 .btn.small{padding:6px 12px;font-size:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px}
-/* start */
-.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center;padding:12px 0 8px}
-.hero h1{font-size:clamp(40px,7vw,76px);font-weight:900;font-stretch:118%;letter-spacing:-.03em}
-.hero p.lead{font-family:var(--serif);font-size:20px;max-width:46ch;margin:16px 0 24px;line-height:1.5}
-.modes{display:grid;gap:10px;margin-top:6px}
-.mode{display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:left;width:100%;padding:14px 16px;border:2px solid var(--ink);border-radius:10px;background:var(--card)}
+.btn:disabled{opacity:.5;cursor:default}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+
+/* início */
+.hero{position:relative;display:grid;grid-template-columns:1.15fr .85fr;gap:32px;align-items:center;padding:8px 0 4px}
+.rosette{position:absolute;right:-60px;top:-40px;width:420px;height:420px;opacity:.5;pointer-events:none;z-index:0}
+.hero>*{position:relative;z-index:1}
+.hero h1{font-size:clamp(38px,6.2vw,66px);font-weight:900;font-stretch:118%;letter-spacing:-.03em}
+.hero p.lead{font-family:var(--serif);font-size:20px;max-width:46ch;margin:16px 0 22px;line-height:1.55}
+.modes{display:grid;gap:10px}
+.mode{display:block;text-align:left;width:100%;padding:16px 18px;border:2px solid var(--ink);border-radius:12px;background:var(--card)}
 .mode:hover{border-color:var(--teal);box-shadow:4px 4px 0 var(--teal)}
-.mode b{font-size:18px;font-stretch:105%}
+.mode b{font-size:19px;font-stretch:106%}
 .mode span{color:var(--muted);font-size:14px}
-.opt{display:flex;gap:10px;align-items:flex-start;margin:16px 0;font-size:15px}
+.mode.main{background:var(--teal);border-color:var(--teal);color:var(--teal-ink)}
+.mode.main span{color:inherit;opacity:.85}
+.mode.main:hover{box-shadow:4px 4px 0 var(--ink)}
+.opt{display:flex;gap:10px;align-items:flex-start;font-size:15px;max-width:52ch}
 .opt input{margin-top:4px;width:18px;height:18px;accent-color:var(--teal)}
 .seedrow{display:flex;gap:8px;margin-top:10px}
 .seedrow input{flex:1;min-width:0;padding:10px;border:2px solid var(--ink);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
-.rules{margin-top:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.rules{margin-top:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .rules .card{padding:14px}
 .rules h3{font-size:16px;margin-bottom:6px}
 .rules p{margin:0;font-size:14px;color:var(--muted)}
-/* game */
-.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:start}
+
+/* rodada */
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;align-items:start}
 .news{border-left:6px solid var(--gold);padding:4px 0 4px 16px;margin-bottom:18px}
 .news h2{font-family:var(--serif);font-size:clamp(26px,4vw,36px);font-weight:700;letter-spacing:-.01em;margin-bottom:10px}
-.news p{font-family:var(--serif);font-size:19px;margin:0;line-height:1.5;max-width:60ch}
+.news p{font-family:var(--serif);font-size:19px;margin:0;line-height:1.55;max-width:60ch}
 .news p.why{font-size:15px;font-style:italic;color:var(--muted);margin-top:8px}
-.dial{padding:20px}
+.dial{padding:22px}
 .dial .big{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.dial .num{font-size:clamp(64px,13vw,112px);font-weight:900;font-stretch:125%;letter-spacing:-.04em;line-height:.95;font-variant-numeric:tabular-nums}
+.dial .num{font-size:clamp(68px,13vw,116px);font-weight:900;font-stretch:125%;letter-spacing:-.04em;line-height:.95;font-variant-numeric:tabular-nums;display:inline-block}
+.dial .num.bump{animation:bump .22s ease-out}
+@keyframes bump{from{transform:scale(1.045)}to{transform:scale(1)}}
 .dial .unit{font-size:28px;font-weight:700}
-.delta{font-size:18px;font-weight:700;margin:6px 0 14px}
+.delta{font-size:18px;font-weight:700;margin:6px 0 18px}
 .delta.up{color:var(--red)}.delta.down{color:var(--teal)}.delta.flat{color:var(--muted)}
-.ruler{width:100%;margin:6px 0 4px;accent-color:var(--teal);height:34px;cursor:pointer}
-.quick{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}
+.rwrap{position:relative;padding:26px 0 22px;margin:0 2px}
+.rwrap .sug{position:absolute;top:26px;height:34px;border-radius:6px;background:color-mix(in srgb,var(--gold) 30%,transparent);border:1px dashed var(--gold);pointer-events:none}
+.rwrap .mk{position:absolute;top:8px;width:0;pointer-events:none}
+.rwrap .mk::after{content:"";position:absolute;left:-1px;top:16px;width:2px;height:44px;background:var(--ink);opacity:.5}
+.rwrap .mk em{position:absolute;left:0;transform:translateX(-50%);font-style:normal;font-size:12px;color:var(--muted);white-space:nowrap}
+.rwrap .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:2px}
+.ruler{-webkit-appearance:none;appearance:none;width:100%;height:34px;margin:0;background:transparent;cursor:pointer;position:relative;z-index:2}
+.ruler::-webkit-slider-runnable-track{height:10px;border-radius:5px;background:linear-gradient(to right,var(--teal) var(--p,50%),var(--line) var(--p,50%))}
+.ruler::-moz-range-track{height:10px;border-radius:5px;background:linear-gradient(to right,var(--teal) var(--p,50%),var(--line) var(--p,50%))}
+.ruler::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;margin-top:-9px;border-radius:50%;background:var(--gold);border:3px solid var(--ink);box-shadow:0 2px 0 var(--ink)}
+.ruler::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--gold);border:3px solid var(--ink)}
+.quick{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 18px}
 .quick .btn.sel{background:var(--ink);color:var(--paper)}
 fieldset{border:0;margin:0 0 18px;padding:0}
 legend{font-weight:700;margin-bottom:8px;padding:0}
 .tones{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.tone input{position:absolute;opacity:0}
-.tone span{display:block;border:2px solid var(--line);border-radius:8px;padding:10px;text-align:center;font-size:14px;font-weight:600;cursor:pointer}
+.tone{position:relative}
+.tone input{position:absolute;opacity:0;inset:0;width:100%;height:100%;cursor:pointer;margin:0}
+.tone span{display:block;border:2px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;font-size:15px;font-weight:700}
 .tone small{display:block;font-weight:400;color:var(--muted);font-size:12px}
 .tone input:checked + span{border-color:var(--teal);background:color-mix(in srgb,var(--teal) 14%,transparent)}
 .tone input:focus-visible + span{outline:3px solid var(--gold);outline-offset:2px}
-.hint{background:color-mix(in srgb,var(--gold) 22%,transparent);border-radius:8px;padding:10px 12px;font-size:14px;margin-bottom:14px}
+.alert{border:2px solid var(--red);background:color-mix(in srgb,var(--red) 14%,transparent);border-radius:10px;padding:10px 14px;margin:10px 0;font-size:15px}
+.dilema{border:2px solid var(--gold);border-radius:12px;padding:12px;margin:0 0 18px}
+.dilema legend{padding:0 6px;font-weight:800}
+.optcard{position:relative;display:block;margin:8px 0}
+.optcard input{position:absolute;opacity:0;inset:0;width:100%;height:100%;cursor:pointer;margin:0}
+.optcard span{display:block;border:2px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card)}
+.optcard b{display:block;font-size:15.5px}
+.optcard small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.optcard input:checked + span{border-color:var(--teal);background:color-mix(in srgb,var(--teal) 14%,transparent)}
+.optcard input:focus-visible + span{outline:3px solid var(--gold);outline-offset:2px}
+.hint{background:color-mix(in srgb,var(--gold) 20%,transparent);border-radius:8px;padding:10px 12px;font-size:14px;margin-bottom:14px}
+.cta{position:sticky;bottom:12px;z-index:5}
+.cta .btn{box-shadow:0 10px 24px -10px rgba(0,0,0,.45)}
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 12px 10px}
 .stat .l{font-size:13px;color:var(--muted)}
-.stat .v{font-size:28px;font-weight:800;font-stretch:112%;font-variant-numeric:tabular-nums}
-.stat .d{font-size:13px;color:var(--muted)}
+.stat .v{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:27px;font-weight:800;font-stretch:112%;font-variant-numeric:tabular-nums;line-height:1.15;margin-top:2px}
+.stat .d{font-size:12.5px;color:var(--muted);margin-top:6px}
 .stat.ok{border-color:var(--green)}.stat.bad{border-color:var(--red)}
+.pill{font-size:12px;font-weight:700;font-stretch:100%;border-radius:999px;padding:2px 8px;white-space:nowrap}
+.pill.good{background:color-mix(in srgb,var(--green) 20%,transparent);color:var(--green)}
+.pill.bad{background:color-mix(in srgb,var(--red) 20%,transparent);color:var(--red)}
+.pill.flat{background:var(--line);color:var(--muted)}
+.meter{position:relative;height:8px;border-radius:4px;background:var(--line);margin-top:8px}
+.meter .band{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--green) 45%,transparent);border-radius:4px}
+.meter .tgt{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.6}
+.meter b{position:absolute;top:-3px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--ink);border:2px solid var(--card)}
+.meter.fillbar b{top:0;left:0;height:8px;width:var(--w);margin:0;border:0;border-radius:4px;background:var(--teal)}
 .chartcard{margin-top:10px;padding:12px}
 .chartcard h3{font-size:15px;margin-bottom:6px}
 .legend{display:flex;gap:14px;font-size:13px;color:var(--muted);flex-wrap:wrap;margin-top:4px}
 .legend i{display:inline-block;width:14px;height:4px;border-radius:2px;margin-right:5px;vertical-align:middle}
-/* resultado da rodada */
-.out h2{font-size:28px;margin-bottom:6px}
-.out ul{padding-left:20px;margin:12px 0}
-.out li{margin:6px 0}
-.pts{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
-.pt{border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:14px}
-.pt b{font-size:20px;display:block}
+details.gloss{margin-top:10px;font-size:14px}
+details.gloss summary{cursor:pointer;font-weight:700;padding:8px 0}
+details.gloss dl{margin:6px 0 0;display:grid;gap:8px}
+details.gloss dt{font-weight:700}
+details.gloss dd{margin:0;color:var(--muted)}
+
+/* comunicado */
+.verdict{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.verdict .vn{font-size:clamp(52px,9vw,84px);font-weight:900;font-stretch:125%;letter-spacing:-.04em;line-height:.95;font-variant-numeric:tabular-nums}
+.chip{border-radius:999px;padding:6px 14px;font-weight:700;font-size:15px;border:2px solid currentColor}
+.chip.up{color:var(--red)}.chip.down{color:var(--teal)}.chip.flat{color:var(--muted)}
+.facts{list-style:none;padding:0;margin:14px 0;display:grid;gap:8px}
+.facts li{border-left:4px solid var(--line);padding:2px 0 2px 12px;font-family:var(--serif);font-size:18px;line-height:1.45}
+.facts li.hl{border-color:var(--gold)}
+.scorebox{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;margin:16px 0 18px}
+.bigpts{font-size:56px;font-weight:900;font-stretch:120%;line-height:.9;letter-spacing:-.03em}
+.bigpts small{display:block;font-size:14px;font-weight:600;font-stretch:100%;color:var(--muted);letter-spacing:0;margin-top:4px}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:96px 1fr 44px;gap:8px;align-items:center;font-size:14px}
+.bar i{display:block;height:10px;border-radius:5px;background:var(--line);position:relative;overflow:hidden}
+.bar i::after{content:"";position:absolute;inset:0;width:var(--w);background:var(--teal);border-radius:5px;animation:grow .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes grow{from{width:0}}
+.bar b{text-align:right;font-variant-numeric:tabular-nums}
+.imini{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.imini .stat .v{font-size:22px}
+.imini .arrow{color:var(--muted);font-weight:500}
+
+/* final */
+.final{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.score{font-size:clamp(88px,17vw,160px);font-weight:900;font-stretch:125%;letter-spacing:-.04em;line-height:.9;font-variant-numeric:tabular-nums}
+.grade{font-size:28px;font-weight:800;font-stretch:108%;margin:10px 0 4px}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.badge{border:2px solid var(--gold);border-radius:999px;padding:5px 12px;font-size:14px;font-weight:600}
+.tl{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;align-items:end;margin:6px 0 4px;height:116px}
+.tlc{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%;font-size:12px;color:var(--muted)}
+.tlb{width:100%;max-width:34px;border-radius:5px 5px 2px 2px;background:var(--teal)}
+.tla{font-weight:700;font-size:13px}
+.tla.up{color:var(--red)}.tla.down{color:var(--teal)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.actions .btn.primary{width:auto}
+.rank{list-style:none;margin:8px 0 0;padding:0}
+.rank li{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+.rank li.me{font-weight:800}
+.tabs{display:flex;gap:6px;margin:8px 0 4px;flex-wrap:wrap}
+.tabs .btn.sel{background:var(--ink);color:var(--paper)}
 .table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:15px}
 .table td,.table th{padding:7px 4px;border-bottom:1px solid var(--line);text-align:right}
 .table td:first-child,.table th:first-child{text-align:left}
 .table th{font-weight:600;color:var(--muted);font-size:13px}
-/* final */
-.final{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.score{font-size:clamp(80px,16vw,150px);font-weight:900;font-stretch:125%;letter-spacing:-.04em;line-height:.9}
-.grade{font-size:26px;font-weight:800;margin:8px 0}
-.badges{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-.badge{border:2px solid var(--gold);border-radius:999px;padding:5px 12px;font-size:14px;font-weight:600}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-.tabs{display:flex;gap:6px;margin:8px 0 4px;flex-wrap:wrap}
-.rank{list-style:none;margin:8px 0 0;padding:0}
-.rank li{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
-.rank li.me{font-weight:800}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:8px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s}
+
+/* overlay e avisos */
+.overlay{position:fixed;inset:0;background:rgba(5,14,15,.7);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.dlg{background:var(--card);border:2px solid var(--ink);border-radius:14px;max-width:560px;width:100%;padding:22px;max-height:90vh;overflow:auto}
+.dlg h2{font-size:28px;margin-bottom:14px}
+.dlg ol{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:12px}
+.dlg li{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.dlg li .n{width:34px;height:34px;border-radius:50%;background:var(--teal);color:var(--teal-ink);display:grid;place-items:center;font-weight:800}
+.dlg li b{display:block;font-size:17px}
+.dlg li span.t{color:var(--muted);font-size:15px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:8px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
 .toast.show{opacity:1}
 footer{margin-top:36px;font-size:13px;color:var(--muted);max-width:80ch}
 .hidden{display:none!important}
 @media(max-width:820px){
   .hero,.grid,.final{grid-template-columns:1fr}
   .rules{grid-template-columns:1fr}
+  .rosette{width:300px;height:300px;right:-90px;top:-20px;opacity:.35}
+  .bar{grid-template-columns:84px 1fr 40px}
 }
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <div class="brand">Copom: você decide</div>
-    <div class="ticks" id="ticks" aria-live="polite"></div>
+    <div class="hdr-right">
+      <div class="ticks" id="ticks" aria-live="polite"></div>
+      <div class="tools">
+        <button class="icon-btn" id="help" type="button">Como jogar</button>
+        <button class="icon-btn" id="theme" type="button" aria-label="Alternar tema claro e escuro">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+      </div>
+    </div>
   </header>
   <main id="app"></main>
   <footer>Simulador educativo com modelo simplificado e cenários fictícios. Não é recomendação de investimento nem previsão econômica. Meta de inflação: 3% ao ano, com tolerância de 1,5% a 4,5%.</footer>
@@ -190,33 +285,73 @@ const SCENARIOS = [
   { id: 'industria', titulo: 'Indústria e entidades patronais pedem corte de juros', texto: 'Federações dizem que a Selic alta "paralisou investimentos". O pleito ganha espaço na imprensa.', pressure: 'cut', dem: -0.1 },
 ];
 
-function shuffle(arr, rng) {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-  return a;
-}
-function pickScenarios(seed) {
-  const rng = mulberry32(seed * 7919 + 13);
-  let pool = shuffle(SCENARIOS, rng);
-  // garante equilíbrio: ao menos 2 choques que pressionam preços e 2 que aliviam
-  for (let tries = 0; tries < 20; tries++) {
-    const pick = pool.slice(0, 8);
-    const up = pick.filter(s => (s.sup || 0) + (s.dem || 0) * 0.5 + (s.exp || 0) > 0.25).length;
-    const down = pick.filter(s => (s.sup || 0) + (s.dem || 0) * 0.5 + (s.exp || 0) < -0.2).length;
-    if (up >= 2 && down >= 2) return pick;
-    pool = shuffle(pool, rng);
-  }
-  return pool.slice(0, 8);
-}
+// ---------- Novos cenários: dilemas, dados no escuro e consequências futuras ----------
+// dilema.opcoes[i]: efeitos extras (sup, dem, fx, exp, cred) e flags que voltam a assombrar o jogador
+SCENARIOS.push(
+  { id: 'guerra', titulo: 'Guerra fecha um corredor estratégico de petróleo e grãos', texto: 'O barril passa de US$ 110 e os fertilizantes dobram de preço. Todos os olhos se voltam para o BC: o choque é de oferta, mas pode contaminar as expectativas.', sup: 0.6, fx: 3, dem: -0.3,
+    dilema: { pergunta: 'Como o BC vai tratar o choque de oferta?', opcoes: [
+      { label: 'Olhar através do choque', desc: 'Dizer que é temporário e preservar a atividade.', exp: 0.2, dem: 0.1 },
+      { label: 'Mostrar vigilância', desc: 'Avisar que não tolerará contaminação das expectativas.', exp: -0.15, dem: -0.15, cred: 2 } ] } },
+  { id: 'ataque', titulo: 'Ataque especulativo contra o real', texto: 'Fundos apostam pesado contra a moeda. O dólar dispara em minutos e o mercado pergunta se o BC tem munição.', fx: 5, exp: 0.1,
+    dilema: { pergunta: 'Vale gastar reservas para conter o dólar?', opcoes: [
+      { label: 'Vender dólares das reservas', desc: 'Acalma agora, mas consome munição e sinaliza fragilidade.', fx: -5, exp: 0.05, cred: -1 },
+      { label: 'Fazer swap cambial', desc: 'Alívio parcial sem esgotar as reservas.', fx: -2.5 },
+      { label: 'Deixar o câmbio flutuar', desc: 'Coerente, mas o repasse aos preços aumenta.', sup: 0.15, cred: 1 } ] } },
+  { id: 'ministro', titulo: 'Ministro da Fazenda convida você para uma reunião reservada antes do Copom', texto: 'A imprensa descobre o convite. O governo diz que quer "alinhamento", mas todos entendem o recado.', pressure: 'cut', exp: 0.05,
+    dilema: { pergunta: 'Qual é a sua resposta ao convite?', opcoes: [
+      { label: 'Ir à reunião', desc: 'Mostra diálogo, com o risco de parecer subordinado.', cred: -3, exp: 0.1 },
+      { label: 'Recusar em público', desc: 'Reafirma a autonomia, ao custo de um conflito aberto.', cred: 3, dem: -0.05, flags: { conflito: 1 } },
+      { label: 'Enviar um diretor', desc: 'Meio-termo que ninguém aplaude nem critica.' } ] } },
+  { id: 'bolha', titulo: 'Imóveis e ativos de risco disparam', texto: 'O crédito barato empurra o preço de apartamentos e ações para máximas. Economistas do próprio BC discutem se há bolha.', dem: 0.35,
+    dilema: { pergunta: 'Como reagir à euforia nos ativos?', opcoes: [
+      { label: 'Alertar no relatório de estabilidade', desc: 'Pressão verbal sem medidas concretas.', exp: -0.05, dem: -0.1 },
+      { label: 'Restringir o crédito com medidas macroprudenciais', desc: 'Esfria os ativos, mas corta consumo.', dem: -0.35, cred: 1 },
+      { label: 'Ignorar: o mandato é a inflação', desc: 'Foco total na meta, e a bolha segue crescendo.', dem: 0.2, flags: { bolha: 1 } } ] } },
+  { id: 'desonera_temp', titulo: 'IPCA cai com uma desoneração temporária', texto: 'A queda impressiona e o governo comemora. Quem acompanha os detalhes sabe que parte dela some em alguns meses.', sup: -0.5, exp: -0.1,
+    dilema: { pergunta: 'Como comunicar a queda da inflação?', opcoes: [
+      { label: 'Celebrar a melhora', desc: 'O mercado se anima agora, mas o recuo pode virar armadilha.', exp: -0.2, cred: 1, flags: { rebote: 2 } },
+      { label: 'Alertar que é temporário', desc: 'Menos aplausos hoje, menos susto depois.', exp: 0.05, cred: 1, flags: { rebote: 1 } } ] } },
+  { id: 'vazamento', titulo: 'A ata do Copom vaza horas antes da divulgação', texto: 'Operadores já ajustaram posições antes do comunicado oficial. Jornais pedem explicações e há suspeita de uso de informação privilegiada.', fx: 1.5, exp: 0.1,
+    dilema: { pergunta: 'Qual será a resposta do BC?', opcoes: [
+      { label: 'Abrir investigação e antecipar a ata', desc: 'Transparência imediata, com desgaste interno.', cred: 2, fx: -1 },
+      { label: 'Minimizar o episódio', desc: 'Evita alarme, mas parece omissão.', cred: -2 },
+      { label: 'Mudar a política de comunicação', desc: 'Silêncio rígido antes das reuniões.', cred: 1, exp: -0.05 } ] } },
+  { id: 'candidato', titulo: 'Candidato líder nas pesquisas propõe elevar a meta de inflação', texto: 'A promessa agrada setores que querem juros menores. O mercado teme que a âncora das expectativas se solte.', fx: 3, exp: 0.3,
+    dilema: { pergunta: 'Como o BC se posiciona?', opcoes: [
+      { label: 'Defender a meta de 3% em público', desc: 'Firmeza institucional, com chance de atrito político.', cred: 3, exp: -0.1, fx: 1 },
+      { label: 'Silêncio institucional', desc: 'Não entrar no debate eleitoral.' },
+      { label: 'Admitir um debate técnico sobre a meta', desc: 'Parece abertura, mas o mercado entende como fraqueza.', exp: 0.25, cred: -2, fx: 1 } ] } },
+  { id: 'banco_sistemico', titulo: 'Rumores de problemas em um banco sistêmico', texto: 'Clientes correm para sacar recursos e as ações do banco despencam. O sistema de pagamentos ainda funciona, mas o risco de contágio cresce.', dem: -0.3, fx: 2,
+    dilema: { pergunta: 'O BC vai socorrer a liquidez?', opcoes: [
+      { label: 'Abrir linha de liquidez de emergência', desc: 'Conter o pânico agora, com risco de estimular riscos futuros.', dem: 0.2, cred: 1, exp: 0.1 },
+      { label: 'Deixar o mercado se ajustar', desc: 'Disciplina de mercado, com risco de crise de confiança.', dem: -0.4, fx: 1.5, cred: -1 } ] } },
+  { id: 'sucessor', titulo: 'Rumor: governo estuda trocar o presidente do BC', texto: 'Sem fonte oficial, circula a informação de que seu nome pode ser substituído por alguém mais "alinhado". O dólar sente.', fx: 3, exp: 0.15,
+    dilema: { pergunta: 'Como reagir ao rumor?', opcoes: [
+      { label: 'Ignorar e seguir trabalhando', desc: 'O silêncio alimenta a especulação.', cred: -2 },
+      { label: 'Afirmar que as decisões serão sempre técnicas', desc: 'Reforça a autonomia, mas expõe o conflito.', cred: 2, fx: 0.5 } ] } },
+  { id: 'apagao', titulo: 'Greve atrasa os dados do IBGE', texto: 'A divulgação do IPCA, do PIB e do desemprego foi adiada. Você decide no escuro, com estimativas e conversas de bastidor.', blind: true },
+  { id: 'estagflacao', titulo: 'IBGE revisa o PIB para baixo e o IPCA para cima', texto: 'Os números revisados mostram uma economia mais fraca e preços mais altos do que se pensava. É o pior dos mundos para quem decide juros.', dem: -0.4, sup: 0.4, exp: 0.1 },
+  { id: 'surto', titulo: 'Surto de doença afeta cadeias de produção', texto: 'Fábricas reduzem turnos e portos operam com restrições. A demanda cai, mas faltam produtos e os preços sobem.', dem: -0.7, sup: 0.3, fx: 2.5 },
+  { id: 'seca2', titulo: 'Seca histórica no Cerrado', texto: 'A pior estiagem em décadas castiga lavouras e hidrelétricas. Alimentos e energia sobem juntos.', sup: 0.7, dem: -0.1 },
+  { id: 'cripto', titulo: 'Colapso de criptoativos derruba patrimônio de milhões', texto: 'Famílias e fundos perdem bilhões em dias. O efeito riqueza negativo esfria o consumo de renda média e alta.', dem: -0.35, fx: 1 },
+  { id: 'congela', titulo: 'Governo congela preço da energia por decreto', texto: 'A conta de luz fica estável no curto prazo, mas o mercado vê o custo sendo empurrado para o futuro e para o Tesouro.', sup: -0.4, exp: 0.25, fx: 2 },
+  { id: 'greve_geral', titulo: 'Greve geral paralisa o país por dois dias', texto: 'Estradas, transporte e serviços ficam parados. A atividade cai agora e os preços de alguns bens saltam.', dem: -0.5, sup: 0.2 },
+  { id: 'bonus', titulo: 'Governo antecipa 13º e abono para milhões de famílias', texto: 'A injeção de renda anima o varejo antes do Natal e esquenta serviços. Economistas dizem que o timing não é por acaso.', dem: 0.45, exp: 0.1 },
+  { id: 'servicos', titulo: 'Serviços aquecem e dominam a inflação', texto: 'Restaurantes, aluguéis e turismo sobem acima da média. É o tipo de inflação que demora mais a ceder.', sup: 0.25, dem: 0.2 },
+);
 
 // Eventos que surgem como consequência das decisões do jogador
 const CONDICIONAIS = [
-  { id: 'c_ancora', cond: s => s.cred < 45, titulo: 'Mercado duvida do compromisso do BC com a meta', texto: 'Os últimos números e decisões minaram a confiança. Os juros longos sobem e as projeções do Focus acompanham.', exp: 0.3, fx: 2 },
-  { id: 'c_cambio', cond: s => s.fx > 6.3, titulo: 'Dólar passa de R$ 6,30 e contamina os preços', texto: 'Importadores repassam o câmbio para eletrônicos, insumos e combustíveis.', sup: 0.4, exp: 0.1 },
-  { id: 'c_desemprego', cond: s => s.unemp > 7.2, titulo: 'Desemprego alto vira bandeira política', texto: 'Sindicatos e parlamentares culpam os juros. O governo cobra o BC publicamente.', pressure: 'cut', dem: -0.15 },
-  { id: 'c_carta', cond: s => s.ipca > BANDA_MAX, titulo: 'Inflação estoura o teto e o BC precisa se explicar', texto: 'Com o IPCA acima de 4,5%, o presidente do BC deve escrever uma carta aberta ao ministro da Fazenda explicando as causas.', exp: 0.15 },
-  { id: 'c_boom', cond: s => s.gap > 1.5, titulo: 'Economia superaquecida: salários correm atrás dos preços', texto: 'Falta mão de obra em serviços e os reajustes superam a produtividade.', dem: 0.2, sup: 0.25 },
-  { id: 'c_deflacao', cond: s => s.ipca < 2.0, titulo: 'Inflação despenca perto do piso da banda', texto: 'Com o IPCA abaixo de 2%, analistas perguntam se os juros ficaram apertados demais.', dem: -0.2, sup: -0.1 },
+  { id: 'c_estouro', cond: s => s.flags.bolha && s.round - s.flags.bolhaAt >= 2, titulo: 'A bolha estoura', texto: 'Os preços de imóveis e ativos despencam. Bancos acumulam perdas, o crédito seca e o dólar sobe. Você havia visto o risco, mas decidiu não agir.', dem: -0.9, fx: 4, cred: -3 },
+  { id: 'c_rebote2', cond: s => s.flags.rebote === 2 && s.round - s.flags.reboteAt >= 2, titulo: 'O efeito da desoneração acaba e a inflação volta', texto: 'O IPCA salta e o mercado lembra do tom de comemoração do BC. A credibilidade sofre.', sup: 0.8, exp: 0.2, cred: -4 },
+  { id: 'c_rebote1', cond: s => s.flags.rebote === 1 && s.round - s.flags.reboteAt >= 2, titulo: 'A desoneração termina e o IPCA volta a subir, como previsto', texto: 'Você havia avisado, e o mercado já tinha incorporado parte do efeito. O choque é menor.', sup: 0.5, exp: 0.05, cred: 1 },
+  { id: 'c_retaliacao', cond: s => s.flags.conflito && s.round - s.flags.conflitoAt >= 2, titulo: 'Governo retalia e ameaça mudar a lei de autonomia do BC', texto: 'Parlamentares aliados apresentam projeto para rever o mandato do presidente do BC. O mercado entra em modo de alerta.', exp: 0.25, fx: 3, cred: -2 },
+  { id: 'c_ancora', cond: s => s.cred < 45, titulo: 'Mercado duvida do compromisso do BC com a meta', texto: 'Os últimos números e decisões minaram a confiança. Os juros longos sobem e as projeções do Focus acompanham.', exp: 0.35, fx: 2.5 },
+  { id: 'c_cambio', cond: s => s.fx > 6.3, titulo: 'Dólar passa de R$ 6,30 e contamina os preços', texto: 'Importadores repassam o câmbio para eletrônicos, insumos e combustíveis.', sup: 0.5, exp: 0.12 },
+  { id: 'c_desemprego', cond: s => s.unemp > 7.2, titulo: 'Desemprego alto vira bandeira política', texto: 'Sindicatos e parlamentares culpam os juros. O governo cobra o BC publicamente.', pressure: 'cut', dem: -0.15, cred: -1 },
+  { id: 'c_carta', cond: s => s.ipca > BANDA_MAX, titulo: 'Inflação estoura o teto e o BC precisa se explicar', texto: 'Com o IPCA acima de 4,5%, o presidente do BC deve escrever uma carta aberta ao ministro da Fazenda explicando as causas e o plano de retorno à meta.', exp: 0.2, cred: -2 },
+  { id: 'c_boom', cond: s => s.gap > 1.5, titulo: 'Economia superaquecida: salários correm atrás dos preços', texto: 'Falta mão de obra em serviços e os reajustes superam a produtividade.', dem: 0.25, sup: 0.3 },
+  { id: 'c_deflacao', cond: s => s.ipca < 2.0, titulo: 'Inflação despenca perto do piso da banda', texto: 'Com o IPCA abaixo de 2%, analistas perguntam se os juros ficaram apertados demais.', dem: -0.25, sup: -0.1 },
   { id: 'c_premio', cond: s => s.cred > 85 && s.exp < 3.3, titulo: 'Investidores premiam a credibilidade do BC', texto: 'O prêmio de risco cai e entram dólares. O BC ganha espaço para decidir com calma.', fx: -3, exp: -0.1 },
 ];
 function scenarioFor(i, scs, s, ctx) {
@@ -228,8 +363,28 @@ function scenarioFor(i, scs, s, ctx) {
   return scs[i];
 }
 
+function shuffle(arr, rng) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function pickScenarios(seed) {
+  const rng = mulberry32(seed * 7919 + 13);
+  let pool = shuffle(SCENARIOS, rng);
+  for (let tries = 0; tries < 40; tries++) {
+    const pick = pool.slice(0, 8);
+    const up = pick.filter(s => (s.sup || 0) + (s.dem || 0) * 0.5 + (s.exp || 0) > 0.25).length;
+    const down = pick.filter(s => (s.sup || 0) + (s.dem || 0) * 0.5 + (s.exp || 0) < -0.2).length;
+    const dil = pick.filter(s => s.dilema).length;
+    const blind = pick.filter(s => s.blind).length;
+    if (up >= 2 && down >= 2 && dil >= 2 && dil <= 4 && blind <= 1) return pick;
+    pool = shuffle(pool, rng);
+  }
+  return pool.slice(0, 8);
+}
+
 function initialState() {
-  return { round: 0, selic: 13.75, ipca: 4.4, exp: 4.3, gap: 0.3, unemp: 5.8, fx: 5.5, cred: 70, sm: 3.95, fed: 4.0 };
+  return { round: 0, selic: 13.75, ipca: 4.4, exp: 4.3, gap: 0.3, unemp: 5.8, fx: 5.5, cred: 70, sm: 3.95, fed: 4.0, lastdS: 0, flags: {} };
 }
 const pib = s => 2.0 + 0.7 * s.gap;
 function taylor(s) {
@@ -238,86 +393,151 @@ function taylor(s) {
 }
 const roundQuarter = x => Math.round(x * 4) / 4;
 
-function step(s, newSelic, tone, sc, rng) {
+// efeitos do cenário somados aos da opção do dilema
+function effects(sc, opt) {
+  const o = sc.dilema ? sc.dilema.opcoes[opt | 0] || {} : {};
+  const sum = k => (sc[k] || 0) + (o[k] || 0);
+  return { sup: sum('sup'), dem: sum('dem'), fx: sum('fx'), exp: sum('exp'), fed: sum('fed'), cred: sum('cred'), flags: o.flags || null, label: o.label || null };
+}
+
+// fim antecipado de mandato
+function isOver(s) {
+  if (s.cred <= 12) return 'confianca';
+  if (s.ipca >= 8) return 'inflacao';
+  if (s.unemp >= 9) return 'recessao';
+  return null;
+}
+const OVER_TXT = {
+  confianca: 'O mercado perdeu a confiança no BC. Pressionado por todos os lados, você pede demissão.',
+  inflacao: 'A inflação saiu de controle. O Conselho Monetário decide afastar o presidente do BC.',
+  recessao: 'A recessão e o desemprego explodiram. O Congresso aprova a sua saída.',
+};
+
+function step(s, newSelic, tone, sc, rng, opt) {
   const noise = () => (rng() + rng() + rng() - 1.5) * 1.15;
-  const n = { ...s };
+  const E = effects(sc, opt);
+  const n = { ...s, flags: { ...s.flags } };
   const dS = newSelic - s.selic;
   n.round = s.round + 1;
   n.selic = newSelic;
-  n.fed = s.fed + (sc.fed || 0);
+  n.lastdS = dS;
+  n.fed = s.fed + E.fed;
+  if (E.flags) for (const k in E.flags) { n.flags[k] = E.flags[k]; n.flags[k + 'At'] = n.round; }
 
   // credibilidade
-  let credD = 0, resisted = false;
+  let credD = E.cred, resisted = false;
   const tay = taylor(s);
   if (sc.pressure === 'cut' && s.exp > META + 0.6) {
-    if (dS < 0) credD -= 4; else { credD += 2; resisted = true; }
+    if (dS < 0) credD -= 6; else { credD += 3; resisted = true; }
   }
-  if (s.exp > META + 1.0 && dS < 0) credD -= 2;
-  if (Math.abs(newSelic - tay) > 2.0) credD -= 2;
-  if (Math.abs(newSelic - tay) <= 0.75) credD += 1;
+  if (s.exp > META + 1.0 && s.ipca > BANDA_MAX - 0.3 && dS < 0) credD -= 3;
+  if (Math.abs(newSelic - tay) > 2.75) credD -= 3;
   if (s.ipca <= BANDA_MAX && s.ipca >= BANDA_MIN && Math.abs(s.exp - META) <= 0.6) credD += 1;
-  if (s.exp > META + 0.5 && tone < 0) credD -= 1;
+  if (s.exp > META + 0.5 && tone < 0) credD -= 2;
   if (s.exp > META + 0.5 && tone > 0) credD += 1;
-  if (s.gap < -1.5 && tone > 0) credD -= 1;
-  n.cred = clamp(s.cred + credD, 5, 100);
+  if (s.gap < -1.5 && tone > 0) credD -= 2;
+  if (s.ipca > BANDA_MAX) credD -= 2;
+  if (s.ipca < BANDA_MIN) credD -= 1;
+  if (s.unemp > 8) credD -= 2;
+  if (s.lastdS * dS < 0 && Math.abs(dS) >= 0.5 && Math.abs(s.lastdS) >= 0.5) credD -= 2; // vai e volta
+  n.cred = clamp(s.cred + credD, 3, 100);
 
-  // transmissão da política (com defasagem)
+  // transmissão da política (menos eficaz com credibilidade baixa)
+  const eff = 0.7 + 0.5 * (s.cred / 100);
   const rr = newSelic - s.exp;
   n.sm = 0.6 * s.sm + 0.4 * (rr - RSTAR);
 
   // câmbio
   const carry = newSelic - n.fed;
-  let dfx = (sc.fx || 0) - 0.9 * dS - 0.25 * (carry - 9.75) - 0.05 * ((s.fx - 5.5) / 5.5) * 100 + noise() * 0.9;
-  dfx = clamp(dfx, -9, 12);
-  n.fx = clamp(s.fx * (1 + dfx / 100), 4.0, 8.5);
+  let dfx = E.fx - 1.1 * dS - 0.30 * (carry - 9.75) - 0.06 * ((s.fx - 5.5) / 5.5) * 100 + (60 - n.cred) * 0.05 + noise() * 1.1;
+  dfx = clamp(dfx, -10, 14);
+  n.fx = clamp(s.fx * (1 + dfx / 100), 3.8, 9);
 
   // atividade
-  n.gap = clamp(0.72 * s.gap - 0.15 * n.sm + 0.1 + (sc.dem || 0) + 0.02 * dfx + noise() * 0.12, -6, 6);
-  const target = 6.2 - 0.4 * n.gap;
-  n.unemp = clamp(s.unemp + 0.25 * (target - s.unemp), 3.2, 14);
+  n.gap = clamp(0.70 * s.gap - 0.20 * eff * n.sm + 0.1 + E.dem + 0.025 * dfx + (s.gap < -2 ? -0.1 : 0) + noise() * 0.15, -7, 7);
+  const target = 6.2 - 0.45 * n.gap;
+  n.unemp = clamp(s.unemp + 0.28 * (target - s.unemp), 3.0, 15, );
 
   // inflação 12m
-  n.ipca = clamp(s.ipca + 0.17 * (0.5 * s.gap + 0.5 * n.gap) + 0.30 * (s.exp - s.ipca) + (sc.sup || 0) + 0.04 * dfx + noise() * 0.08, 0, 20);
+  n.ipca = clamp(s.ipca + 0.24 * (0.5 * s.gap + 0.5 * n.gap) + 0.34 * (s.exp - s.ipca) + E.sup + 0.05 * dfx + noise() * 0.10, 0, 25);
 
   // expectativas
-  n.exp = clamp(s.exp + 0.22 * (n.ipca - s.exp) + 0.12 * (n.cred / 100) * (META - s.exp)
-    + (sc.exp || 0) - 0.10 * tone * (0.3 + n.cred / 100) + (70 - n.cred) * 0.004 + noise() * 0.04, 1.5, 12);
+  const spiral = (s.exp > META + 1.5 && n.cred < 50) ? 0.15 : 0;
+  n.exp = clamp(s.exp + 0.30 * (n.ipca - s.exp) + 0.13 * (n.cred / 100) * (META - s.exp)
+    + E.exp - 0.12 * tone * (0.3 + n.cred / 100) + (70 - n.cred) * 0.006 + spiral + noise() * 0.05, 1.5, 14);
 
-  const dist = Math.abs(n.ipca - META), distE = Math.abs(n.exp - META);
+  const dist = 0.6 * Math.abs(n.ipca - META) + 0.4 * Math.abs(n.exp - META);
+  const outBand = n.ipca > BANDA_MAX || n.ipca < BANDA_MIN;
   const parts = {
-    inf: 40 * Math.max(0, 1 - (0.6 * dist + 0.4 * distE) / 1.8),
-    act: 30 * Math.max(0, 1 - (n.gap < 0 ? Math.abs(n.gap) / 1.8 : n.gap / 2.4)),
-    cr: 20 * n.cred / 100,
-    st: 10 * Math.max(0, 1 - Math.abs(dfx) / 8),
+    inf: Math.max(0, 35 * (1 - Math.pow(Math.max(0, dist - 0.4) / 1.5, 1.4)) - (outBand ? 8 : 0)),
+    act: Math.max(0, 30 * Math.max(0, 1 - (n.gap < 0 ? Math.abs(n.gap) / 2.2 : n.gap / 2.2)) - Math.max(0, n.unemp - 6.8) * 4),
+    cr: 20 * Math.pow(n.cred / 100, 1.5),
+    st: 10 * Math.max(0, 1 - Math.abs(dfx) / 6) + 5 * Math.max(0, 1 - Math.abs(dS) / 1.25),
   };
   parts.total = parts.inf + parts.act + parts.cr + parts.st;
-  return { state: n, dS, dfx, credD, resisted, parts, tone, scId: sc.id };
+  const over = isOver(n);
+  return { state: n, dS, dfx, credD, resisted, parts, tone, scId: sc.id, opt: opt | 0, label: E.label, over };
 }
 
-function badges(hist) {
+function badges(hist, over) {
   const last = hist[hist.length - 1], out = [];
+  if (over) return [['Mandato interrompido', OVER_TXT[over]]];
   if (last.ipca >= 2.5 && last.ipca <= 3.5) out.push(['Meta na mão', 'Terminou com o IPCA entre 2,5% e 3,5%.']);
-  if (Math.abs(last.gap) <= 0.8 && last.ipca <= BANDA_MAX) out.push(['Pouso suave', 'Inflação dentro da banda e economia perto do potencial.']);
+  if (Math.abs(last.gap) <= 0.8 && last.ipca <= BANDA_MAX && last.ipca >= BANDA_MIN) out.push(['Pouso suave', 'Inflação dentro da banda e economia perto do potencial.']);
   if (hist.every(h => Math.abs(h.dS) <= 0.5)) out.push(['Sem sustos', 'Nenhuma decisão passou de 0,50 p.p.']);
   if (hist.some(h => h.resisted)) out.push(['Resistiu à pressão', 'Segurou a Selic quando o governo pediu corte.']);
   if (last.exp <= 3.5 && last.cred >= 80) out.push(['Expectativas ancoradas', 'Mercado acredita na meta.']);
-  if (hist.filter(h => h.parts.total >= 80).length >= 5) out.push(['Consistência', 'Cinco reuniões ou mais com nota 80+.']);
+  if (hist.filter(h => h.parts.total >= 75).length >= 5) out.push(['Consistência', 'Cinco reuniões ou mais com nota 75+.']);
+  if (hist.every(h => h.ipca >= BANDA_MIN && h.ipca <= BANDA_MAX)) out.push(['Sempre na banda', 'IPCA dentro da tolerância em todas as reuniões.']);
   return out;
 }
-function finalize(hist, veteran) {
-  const avg = hist.reduce((a, h) => a + h.parts.total, 0) / hist.length;
-  let score = Math.round(avg * 10);
+
+// Pontuação: reuniões finais pesam mais; o estado final dá bônus ou penalidades
+function finalize(hist, veteran, over) {
+  const W = i => 0.6 + 0.8 * (i / 7);
+  let wsum = 0, tot = 0;
+  for (let i = 0; i < 8; i++) { wsum += W(i); if (hist[i]) tot += W(i) * hist[i].parts.total; }
+  const avg = tot / wsum;
+  const last = hist[hist.length - 1];
+  let bonus = 0;
+  if (!over) {
+    if (last.ipca >= 2.5 && last.ipca <= 3.5) bonus += 50;
+    else if (last.ipca >= BANDA_MIN && last.ipca <= BANDA_MAX) bonus += 10;
+    else bonus -= last.ipca > 6 ? 120 : 70;
+    if (last.exp <= 3.5) bonus += 20; else if (last.exp > 4.5) bonus -= 40;
+    if (last.unemp > 8) bonus -= 50;
+    if (last.cred >= 80) bonus += 20; else if (last.cred < 40) bonus -= 50;
+    bonus -= 20 * hist.filter(h => h.ipca > BANDA_MAX || h.ipca < BANDA_MIN).length;
+  }
+  let score = Math.round(avg * 10 + bonus);
+  if (over) score = Math.round(score * 0.6);
+  score = clamp(score, 0, 1000);
   if (veteran) score = Math.min(1000, Math.round(score * 1.1));
-  return { score, avg, badges: badges(hist) };
+  return { score, avg, bonus, badges: badges(hist, over), over: over || null };
 }
-function grade(score) {
-  if (score >= 650) return 'Lenda do Copom';
-  if (score >= 590) return 'Guardião da Meta';
-  if (score >= 540) return 'Gestor de Crise';
-  if (score >= 490) return 'Diretor Prudente';
-  if (score >= 430) return 'Estagiário Promovido';
+function grade(score, over) {
+  if (over) return 'Demitido';
+  if (score >= 840) return 'Lenda do Copom';
+  if (score >= 740) return 'Guardião da Meta';
+  if (score >= 640) return 'Gestor de Crise';
+  if (score >= 540) return 'Diretor Prudente';
+  if (score >= 380) return 'Estagiário Promovido';
   return 'Inflação Fora de Controle';
 }
+// Parecer da equipe técnica: simula a decisão sem ruído, olhando duas reuniões à frente (ignora o dilema e os imprevistos)
+function advice(s, sc) {
+  const rng0 = () => 0.5;
+  let best = null;
+  const lo = Math.max(2, s.selic - 2), hi = Math.min(25, s.selic + 2);
+  for (let sel = lo; sel <= hi + 1e-9; sel += 0.25) {
+    const a = step(s, sel, 0, sc, rng0, -1);
+    const b = step(a.state, sel, 0, {}, rng0, -1);
+    const v = a.parts.total + 0.9 * b.parts.total - (a.over ? 200 : 0);
+    if (!best || v > best.v + 1e-9) best = { v, sel };
+  }
+  return roundQuarter(best.sel);
+}
+
 // ENGINE_END
 // ---------- Ranking global (Supabase) ----------
 // Preencha as duas linhas abaixo depois de criar o projeto no Supabase. Vazio = só ranking local.
@@ -381,6 +601,43 @@ function mountBoard(el, title, tabs, active = 0, mine = null) {
   load(active);
 }
 
+const REDUCED = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function animateNum(el, to, fn, dur = 900) {
+  if (REDUCED || !window.requestAnimationFrame) { el.textContent = fn(to); return; }
+  const t0 = performance.now();
+  const tick = t => { const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = fn(to * e); if (p < 1) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+}
+
+// ---------- tema e ajuda ----------
+function applyTheme(t) { document.documentElement.dataset.theme = t; try { localStorage.setItem('copomgame.theme', t); } catch (e) {} }
+$('#theme').onclick = () => applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+$('#help').onclick = () => showTutorial();
+
+function showTutorial() {
+  if ($('.overlay')) return;
+  const prevFocus = document.activeElement;
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  ov.innerHTML = `<div class="dlg" role="dialog" aria-modal="true" aria-labelledby="tt">
+    <h2 id="tt">Como jogar</h2>
+    <ol>
+      <li><span class="n">1</span><div><b>Leia a notícia</b><span class="t">Cada reunião começa com um fato novo: petróleo, câmbio, gastos do governo, safra. Ele empurra preços, atividade ou dólar.</span></div></li>
+      <li><span class="n">2</span><div><b>Decida a Selic e o tom</b><span class="t">Juros mais altos seguram a inflação, mas esfriam a economia. Juros mais baixos fazem o contrário. O tom do comunicado muda a expectativa do mercado.</span></div></li>
+      <li><span class="n">3</span><div><b>Veja o impacto</b><span class="t">Os efeitos demoram a aparecer. Cada reunião vale até 100 pontos, e a nota final vai de 0 a 1000. A meta é manter o IPCA perto de 3%.</span></div></li>
+    </ol>
+    <button class="btn primary" id="tok" type="button">Entendi, vamos jogar</button>
+  </div>`;
+  document.body.appendChild(ov);
+  const close = () => { ov.remove(); document.removeEventListener('keydown', onKey); try { localStorage.setItem('copomgame.tut', '1'); } catch (e) {} if (prevFocus && prevFocus.focus) prevFocus.focus(); };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  ov.onclick = e => { if (e.target === ov) close(); };
+  $('#tok', ov).onclick = close;
+  $('#tok', ov).focus();
+}
+
+// ---------- componentes ----------
 function drawTicks() {
   const el = $('#ticks');
   if (!G) { el.innerHTML = ''; return; }
@@ -390,46 +647,72 @@ function drawTicks() {
 }
 
 function startGame(seed, veteran) {
-  G = { seed, veteran, scs: pickScenarios(seed), rng: mulberry32(seed), s: initialState(), hist: [], decisions: [], idx: 0, phase: 'decide', ctx: { used: new Set(), last: -9 }, series: [{ selic: 13.75, ipca: 4.4, exp: 4.3 }] };
+  G = { seed, veteran, scs: pickScenarios(seed), rng: mulberry32(seed), s: initialState(), hist: [], decisions: [], idx: 0, phase: 'decide', over: null, opt: null, blind: false, ctx: { used: new Set(), last: -9 }, series: [{ selic: 13.75, ipca: 4.4, exp: 4.3 }] };
   renderRound();
+  let seen = false; try { seen = !!localStorage.getItem('copomgame.tut'); } catch (e) {}
+  if (!seen) showTutorial();
 }
 
 function chart(series, key, min, max, band) {
   const W = 360, H = 130, p = 22, n = series[0].length;
   const x = i => p + (n === 1 ? 0 : i * (W - p - 8) / (n - 1));
   const y = v => H - 18 - ((v - min) / (max - min)) * (H - 30);
-  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${key}">`;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${key === 'selic' ? 'Gráfico da Selic' : 'Gráfico de inflação e expectativas'}">`;
   if (band) svg += `<rect x="${p}" y="${y(band[1])}" width="${W - p - 8}" height="${y(band[0]) - y(band[1])}" fill="var(--green)" opacity=".16"/>`;
   [min, (min + max) / 2, max].forEach(v => svg += `<text x="0" y="${y(v) + 4}" font-size="10" fill="var(--muted)">${Math.round(v)}</text><line x1="${p}" x2="${W - 8}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/>`);
   series.forEach((vals, k) => {
     const colors = key === 'selic' ? ['var(--teal)'] : ['var(--red)', 'var(--gold)'];
     const d = vals.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(clamp(v, min, max)).toFixed(1)}`).join(' ');
     svg += `<path d="${d}" fill="none" stroke="${colors[k]}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
-    const last = vals[vals.length - 1];
-    svg += `<circle cx="${x(vals.length - 1)}" cy="${y(clamp(last, min, max))}" r="4" fill="${colors[k]}"/>`;
+    svg += `<circle cx="${x(vals.length - 1)}" cy="${y(clamp(vals[vals.length - 1], min, max))}" r="4" fill="${colors[k]}"/>`;
   });
   return svg + '</svg>';
 }
 
-function statCard(label, value, sub, cls = '') {
-  return `<div class="stat ${cls}"><div class="l">${label}</div><div class="v">${value}</div><div class="d">${sub}</div></div>`;
+const meter = (v, min, max, band, target) => {
+  const pc = x => clamp((x - min) / (max - min), 0, 1) * 100;
+  return `<div class="meter" aria-hidden="true">${band ? `<i class="band" style="left:${pc(band[0])}%;width:${pc(band[1]) - pc(band[0])}%"></i>` : ''}${target != null ? `<i class="tgt" style="left:${pc(target)}%"></i>` : ''}<b style="left:${pc(v)}%"></b></div>`;
+};
+const fillbar = v => `<div class="meter fillbar" aria-hidden="true"><b style="--w:${clamp(v, 0, 100)}%"></b></div>`;
+function pill(d, good, dec = 2, suf = '') {
+  if (Math.abs(d) < Math.pow(10, -dec) / 2) return '<span class="pill flat">estável</span>';
+  return `<span class="pill ${good ? 'good' : 'bad'}">${d > 0 ? '▲' : '▼'} ${fmt(Math.abs(d), dec)}${suf}</span>`;
 }
+function statCard(label, value, sub, o = {}) {
+  return `<div class="stat ${o.cls || ''}"><div class="l">${label}</div><div class="v"><span>${value}</span>${o.pill || ''}</div>${o.meter || ''}<div class="d">${sub}</div></div>`;
+}
+
 function dashboard() {
-  const s = G.s, prev = G.hist.length ? G.hist[G.hist.length - 1].prev : null;
-  const dlt = (a, b, d = 2, suf = ' p.p.') => prev ? `${sgn(a - b, d)}${suf} desde a última` : 'ponto de partida';
+  const s = G.s, pv = G.hist.length ? G.hist[G.hist.length - 1].prev : null, sel = G.series;
   const inBand = s.ipca >= BANDA_MIN && s.ipca <= BANDA_MAX;
-  const sel = G.series;
+  const closer = (a, b) => Math.abs(a - META) < Math.abs(b - META);
+  const bl = G.blind, off = ((G.seed * 31 + G.idx * 17) % 61) / 100 - 0.3;
+  const val = (v, dec, suf) => bl ? `${fmt(v - 0.7 + off, dec)}–${fmt(v + 0.7 + off, dec)}${suf}` : fmt(v, dec) + suf;
+  const nb = o => bl ? { ...o, meter: '', pill: '', cls: '' } : o;
   return `<div class="stats">
-    ${statCard('IPCA em 12 meses', fmt(s.ipca) + '%', inBand ? 'dentro da banda (1,5% a 4,5%)' : 'fora da banda de tolerância', inBand ? 'ok' : 'bad')}
-    ${statCard('Expectativa de inflação (Focus)', fmt(s.exp) + '%', dlt(s.exp, prev && prev.exp))}
-    ${statCard('PIB em 12 meses', fmt(pib(s), 1) + '%', 'atividade ' + (s.gap > 0.4 ? 'aquecida' : s.gap < -0.8 ? 'em desaceleração' : 'perto do potencial'))}
-    ${statCard('Desemprego', fmt(s.unemp, 1) + '%', dlt(s.unemp, prev && prev.unemp, 1))}
-    ${statCard('Dólar', 'R$ ' + fmt(s.fx), 'juro americano em ' + fmt(s.fed) + '%')}
-    ${statCard('Credibilidade do BC', Math.round(s.cred) + '/100', s.cred >= 70 ? 'mercado confia na meta' : 'âncora fragilizada', s.cred < 45 ? 'bad' : '')}
+    ${statCard('IPCA em 12 meses', val(s.ipca, 2, '%'), bl ? 'dado atrasado: estimativa' : inBand ? 'dentro da banda (1,5% a 4,5%)' : 'fora da banda de tolerância', nb({ cls: inBand ? 'ok' : 'bad', meter: meter(s.ipca, 0, 8, [BANDA_MIN, BANDA_MAX], META), pill: pv ? pill(s.ipca - pv.ipca, closer(s.ipca, pv.ipca), 2, ' p.p.') : '' }))}
+    ${statCard('Expectativa (Focus)', val(s.exp, 2, '%'), bl ? 'dado atrasado: estimativa' : 'o que o mercado espera; a meta é 3%', nb({ meter: meter(s.exp, 0, 8, [BANDA_MIN, BANDA_MAX], META), pill: pv ? pill(s.exp - pv.exp, closer(s.exp, pv.exp), 2, ' p.p.') : '' }))}
+    ${statCard('PIB em 12 meses', val(pib(s), 1, '%'), bl ? 'dado atrasado: estimativa' : s.gap > 0.4 ? 'atividade aquecida' : s.gap < -0.8 ? 'atividade em desaceleração' : 'perto do potencial', nb({ meter: meter(pib(s), -3, 6, null, 2), pill: pv ? pill(pib(s) - pib(pv), pib(s) >= pib(pv), 1, ' p.p.') : '' }))}
+    ${statCard('Desemprego', val(s.unemp, 1, '%'), bl ? 'dado atrasado: estimativa' : 'quanto menor, melhor', nb({ meter: meter(s.unemp, 3, 12, null, null), pill: pv ? pill(s.unemp - pv.unemp, s.unemp <= pv.unemp, 1, ' p.p.') : '' }))}
+    ${statCard('Dólar', 'R$ ' + fmt(s.fx), 'juro americano em ' + fmt(s.fed) + '%', { pill: pv ? pill(s.fx - pv.fx, s.fx <= pv.fx, 2) : '' })}
+    ${statCard('Credibilidade do BC', Math.round(s.cred) + '/100', s.cred >= 70 ? 'mercado confia na meta' : 'âncora fragilizada', { cls: s.cred < 45 ? 'bad' : '', meter: fillbar(s.cred), pill: pv ? pill(s.cred - pv.cred, s.cred >= pv.cred, 0) : '' })}
   </div>
   <div class="card chartcard"><h3>Selic ao longo do mandato</h3>${chart([sel.map(r => r.selic)], 'selic', 2, 25)}</div>
   <div class="card chartcard"><h3>Inflação e expectativas</h3>${chart([sel.map(r => r.ipca), sel.map(r => r.exp)], 'infl', 0, 10, [BANDA_MIN, BANDA_MAX])}
-    <div class="legend"><span><i style="background:var(--red)"></i>IPCA 12m</span><span><i style="background:var(--gold)"></i>Focus</span><span><i style="background:var(--green);opacity:.4"></i>banda da meta</span></div></div>`;
+    <div class="legend"><span><i style="background:var(--red)"></i>IPCA 12m</span><span><i style="background:var(--gold)"></i>Focus</span><span><i style="background:var(--green);opacity:.4"></i>banda da meta</span></div></div>
+  <details class="gloss"><summary>O que significam estes indicadores?</summary><dl>
+    <dt>IPCA em 12 meses</dt><dd>A inflação oficial acumulada no último ano. Meta: 3%, com tolerância de 1,5% a 4,5%.</dd>
+    <dt>Expectativa (Focus)</dt><dd>A inflação que os economistas do mercado esperam. Se subir, os preços reais tendem a subir também.</dd>
+    <dt>Credibilidade</dt><dd>Quanto o mercado acredita que o BC vai cumprir a meta. Com credibilidade alta, as expectativas ficam ancoradas.</dd>
+    <dt>PIB e desemprego</dt><dd>Mostram o ritmo da economia. Juros altos demais esfriam a atividade e aumentam o desemprego.</dd>
+  </dl></details>`;
+}
+
+function rosette() {
+  let s = '<svg class="rosette" viewBox="-100 -100 200 200" aria-hidden="true" fill="none" stroke="var(--teal)" stroke-width=".6">';
+  for (let i = 0; i < 36; i++) s += `<ellipse rx="92" ry="38" transform="rotate(${i * 5})"/>`;
+  for (let r = 14; r <= 94; r += 10) s += `<circle r="${r}" opacity=".5"/>`;
+  return s + '</svg>';
 }
 
 function renderStart() {
@@ -437,22 +720,23 @@ function renderStart() {
   const daily = todaySeed();
   app.innerHTML = `
   <section class="hero">
+    ${rosette()}
     <div>
       <h1>Você é o presidente do Banco Central.</h1>
-      <p class="lead">Oito reuniões do Copom. Oito decisões sobre a Selic. Segure a inflação na meta de 3% sem derrubar a economia, e sem perder a confiança do mercado.</p>
-      <label class="opt"><input type="checkbox" id="vet"><span><b>Modo veterano:</b> sem parecer técnico da equipe, com bônus de 10% na nota final.</span></label>
+      <p class="lead">Oito reuniões do Copom, oito decisões sobre a Selic. Segure a inflação na meta de 3% sem derrubar a economia e sem perder a confiança do mercado.</p>
+      <label class="opt"><input type="checkbox" id="vet"><span><b>Modo veterano:</b> sem parecer técnico da equipe e com bônus de 10% na nota final.</span></label>
     </div>
     <div class="modes">
-      <button class="mode" id="m-daily"><div><b>Desafio do dia</b><br><span>Mesmos cenários para todo mundo hoje (#${daily})</span></div></button>
-      <button class="mode" id="m-rand"><div><b>Partida aleatória</b><br><span>Cenários sorteados</span></div></button>
+      <button class="mode main" id="m-daily"><b>Jogar o desafio do dia</b><br><span>Mesmos cenários para todo mundo hoje (#${daily})</span></button>
+      <button class="mode" id="m-rand"><b>Partida aleatória</b><br><span>Cenários sorteados</span></button>
       <div class="card"><b>Tenho um código de desafio</b>
         <div class="seedrow"><input id="seedin" inputmode="numeric" placeholder="ex.: 482913" aria-label="Código do desafio"><button class="btn" id="m-seed">Jogar</button></div>
       </div>
     </div>
   </section>
   <section class="rules">
-    <div class="card"><h3>Como funciona</h3><p>Cada rodada traz uma notícia. Você escolhe a Selic (em passos de 0,25 p.p.) e o tom do comunicado.</p></div>
-    <div class="card"><h3>Como se pontua</h3><p>Até 100 pontos por reunião: inflação e expectativas, atividade, credibilidade e estabilidade do câmbio. A nota final vai de 0 a 1000.</p></div>
+    <div class="card"><h3>Como funciona</h3><p>Cada rodada traz uma notícia. Você escolhe a Selic, em passos de 0,25 p.p., e o tom do comunicado.</p></div>
+    <div class="card"><h3>Como se pontua</h3><p>Até 100 pontos por reunião (inflação, atividade, credibilidade e estabilidade). As últimas reuniões pesam mais, e o estado final da economia dá bônus ou penalidades. Se perder o cargo, a nota despenca.</p></div>
     <div class="card"><h3>Atenção às defasagens</h3><p>Os juros demoram a fazer efeito. Quem reage tarde demais, ou exagera, paga a conta nas reuniões seguintes.</p></div>
   </section>
   ${GLOBAL ? '<section class="card" id="gstart" style="margin-top:20px"></section>' : ''}
@@ -469,12 +753,17 @@ function rankHtml(meIdx) {
   return `<section class="card" style="margin-top:20px"><h3>Seus melhores mandatos (neste navegador)</h3><ol class="rank">${r.map((x, i) => `<li class="${i === meIdx ? 'me' : ''}"><span>${i + 1}. ${esc(x.name)} · ${esc(x.grade)}</span><span>${x.score} pts · #${x.seed}</span></li>`).join('')}</ol></section>`;
 }
 
+// ---------- rodada ----------
 function renderRound() {
   G.phase = 'decide'; drawTicks();
   const s = G.s;
   const sc = G.scs[G.idx] = scenarioFor(G.idx, G.scs, s, G.ctx);
-  const tay = roundQuarter(taylor(s));
-  const lo = Math.max(2, s.selic - 3), hi = Math.min(25, s.selic + 3);
+  G.blind = !!sc.blind; G.opt = null;
+  const tay = advice(s, sc), showAdv = !G.veteran && !sc.blind;
+  const lo = Math.max(2, s.selic - 3), hi = Math.min(25, s.selic + 3), span = hi - lo;
+  const pos = v => clamp((v - lo) / span, 0, 1);
+  const at = v => `calc(${pos(v) * 100}% + ${(0.5 - pos(v)) * 28}px)`;
+  const sugLo = Math.max(lo, tay - 0.5), sugHi = Math.min(hi, tay + 0.5);
   G.choice = s.selic; G.tone = 0;
   app.innerHTML = `
   <div class="grid">
@@ -482,12 +771,18 @@ function renderRound() {
       <article class="news" aria-labelledby="nt"><h2 id="nt">${sc.titulo}</h2><p>${sc.texto}</p>${sc.isCond ? '<p class="why">Este evento surgiu por causa dos seus números.</p>' : ''}</article>
       <section class="card dial" aria-label="Decisão da Selic">
         <div class="big"><span class="num" id="num">${fmt(s.selic)}</span><span class="unit">% ao ano</span></div>
-        <div class="delta flat" id="delta">Manter a Selic</div>
-        <input class="ruler" id="rule" type="range" min="${lo}" max="${hi}" step="0.25" value="${s.selic}" aria-label="Meta da Selic">
+        <div class="delta flat" id="delta" aria-live="polite">Manter a Selic</div>
+        <div class="rwrap">
+          ${!showAdv || sugHi < sugLo ? '' : `<span class="sug" style="left:${at(sugLo)};width:${Math.max(2, (pos(sugHi) - pos(sugLo)) * 100)}%"></span>`}
+          <span class="mk" style="left:${at(s.selic)}"><em>atual</em></span>
+          <input class="ruler" id="rule" type="range" min="${lo}" max="${hi}" step="0.25" value="${s.selic}" aria-label="Meta da Selic em % ao ano">
+          <div class="ends"><span>${fmt(lo)}%</span><span>${fmt(hi)}%</span></div>
+        </div>
         <div class="quick" id="quick">
           ${[-1, -0.5, -0.25, 0, 0.25, 0.5, 1].map(d => `<button class="btn small" data-d="${d}">${d === 0 ? 'Manter' : sgn(d)}</button>`).join('')}
         </div>
-        ${G.veteran ? '' : `<div class="hint">A equipe técnica sugere uma Selic entre <b>${fmt(Math.max(2, tay - 0.5))}%</b> e <b>${fmt(tay + 0.5)}%</b>. É só um parecer: o voto é seu.</div>`}
+        ${showAdv ? `<div class="hint">A equipe técnica sugere uma Selic perto de <b>${fmt(tay)}%</b> (faixa pontilhada na régua). O parecer ignora o dilema e os imprevistos: o voto é seu.</div>` : sc.blind ? '<div class="hint">Sem dados oficiais, a equipe técnica não emite parecer nesta reunião.</div>' : ''}
+        ${sc.dilema ? `<fieldset class="dilema"><legend>Dilema: ${sc.dilema.pergunta}</legend>${sc.dilema.opcoes.map((o, i) => `<label class="optcard"><input type="radio" name="opt" value="${i}"><span><b>${o.label}</b><small>${o.desc}</small></span></label>`).join('')}</fieldset>` : ''}
         <fieldset><legend>Tom do comunicado</legend>
           <div class="tones">
             <label class="tone"><input type="radio" name="tone" value="1"><span>Duro<small>vigilante com a inflação</small></span></label>
@@ -495,32 +790,40 @@ function renderRound() {
             <label class="tone"><input type="radio" name="tone" value="-1"><span>Flexível<small>atento à atividade</small></span></label>
           </div>
         </fieldset>
-        <button class="btn primary" id="go">Anunciar decisão</button>
+        <div class="cta"><button class="btn primary" id="go" type="button">Anunciar decisão</button></div>
       </section>
     </div>
     <div>${dashboard()}</div>
   </div>`;
-  const upd = () => {
+  const num = $('#num');
+  const upd = (animate) => {
     const d = G.choice - s.selic;
-    $('#num').textContent = fmt(G.choice);
+    num.textContent = fmt(G.choice);
+    if (animate && !REDUCED) { num.classList.remove('bump'); void num.offsetWidth; num.classList.add('bump'); }
     const el = $('#delta');
     el.className = 'delta ' + (d > 0 ? 'up' : d < 0 ? 'down' : 'flat');
     el.textContent = d === 0 ? 'Manter a Selic' : (d > 0 ? 'Alta de ' : 'Corte de ') + fmt(Math.abs(d)) + ' p.p.';
-    $('#rule').value = G.choice;
+    const r = $('#rule'); r.value = G.choice; r.style.setProperty('--p', (pos(G.choice) * 100).toFixed(1) + '%');
     document.querySelectorAll('#quick .btn').forEach(b => b.classList.toggle('sel', Math.abs(s.selic + parseFloat(b.dataset.d) - G.choice) < 1e-6));
+    const need = sc.dilema && G.opt === null;
+    $('#go').disabled = !!need;
+    $('#go').textContent = need ? 'Escolha uma opção no dilema' : d === 0 ? `Anunciar: manter em ${fmt(G.choice)}%` : `Anunciar: ${d > 0 ? 'subir' : 'cortar'} para ${fmt(G.choice)}%`;
   };
-  $('#rule').oninput = e => { G.choice = parseFloat(e.target.value); upd(); };
-  $('#quick').onclick = e => { const b = e.target.closest('button'); if (!b) return; G.choice = clamp(s.selic + parseFloat(b.dataset.d), lo, hi); upd(); };
+  $('#rule').oninput = e => { G.choice = parseFloat(e.target.value); upd(true); };
+  $('#quick').onclick = e => { const b = e.target.closest('button'); if (!b) return; G.choice = clamp(s.selic + parseFloat(b.dataset.d), lo, hi); upd(true); };
   document.querySelectorAll('input[name=tone]').forEach(r => r.onchange = () => G.tone = parseInt(r.value, 10));
+  document.querySelectorAll('input[name=opt]').forEach(r => r.onchange = () => { G.opt = parseInt(r.value, 10); upd(false); });
   $('#go').onclick = decide;
-  upd();
+  upd(false);
+  window.scrollTo({ top: 0 });
 }
 
 function decide() {
-  G.decisions.push({ selic: G.choice, tone: G.tone });
-  const prev = G.s, sc = G.scs[G.idx];
-  const r = step(prev, G.choice, G.tone, sc, G.rng);
+  const prev = G.s, sc = G.scs[G.idx], opt = sc.dilema ? (G.opt === null ? 0 : G.opt) : 0;
+  G.decisions.push({ selic: G.choice, tone: G.tone, opt });
+  const r = step(prev, G.choice, G.tone, sc, G.rng, opt);
   G.s = r.state;
+  if (r.over) G.over = r.over;
   G.hist.push({ ...r.state, prev, dS: r.dS, parts: r.parts, resisted: r.resisted, tone: G.tone, scId: sc.id, titulo: sc.titulo, credD: r.credD });
   G.series.push({ selic: r.state.selic, ipca: r.state.ipca, exp: r.state.exp });
   G.idx++;
@@ -530,57 +833,56 @@ function decide() {
 
 function renderOutcome(r, prev, sc) {
   drawTicks();
-  const s = G.s, p = r.parts, last = G.idx >= 8;
-  const bullets = [];
-  const dS = r.dS;
-  bullets.push(dS === 0 ? 'O Copom manteve a Selic em ' + fmt(s.selic) + '%.' : `O Copom ${dS > 0 ? 'elevou' : 'cortou'} a Selic em ${fmt(Math.abs(dS))} p.p., para ${fmt(s.selic)}%.`);
-  const di = s.ipca - prev.ipca, de = s.exp - prev.exp;
-  bullets.push(`O IPCA em 12 meses ${di > 0.02 ? 'subiu' : di < -0.02 ? 'caiu' : 'ficou estável'} (${fmt(prev.ipca)}% → ${fmt(s.ipca)}%) e as expectativas ${de > 0.02 ? 'pioraram' : de < -0.02 ? 'melhoraram' : 'ficaram estáveis'} (${fmt(prev.exp)}% → ${fmt(s.exp)}%).`);
-  const dg = s.gap - prev.gap;
-  bullets.push(`A atividade ${dg > 0.15 ? 'ganhou ritmo' : dg < -0.15 ? 'perdeu ritmo' : 'seguiu estável'}; o desemprego está em ${fmt(s.unemp, 1)}%.`);
-  if (Math.abs(r.dfx) > 2) bullets.push(`O dólar ${r.dfx > 0 ? 'subiu' : 'caiu'} ${fmt(Math.abs(r.dfx), 1)}% e fechou a R$ ${fmt(s.fx)}.`);
-  if (r.resisted) bullets.push('Você resistiu à pressão política com as expectativas desancoradas. O mercado notou.');
-  else if (sc.pressure === 'cut' && dS < 0 && prev.exp > META + 0.6) bullets.push('Cortar sob pressão política, com a inflação esperada acima da meta, custou credibilidade.');
-  if (r.credD <= -3) bullets.push('A decisão chamou atenção negativa do mercado e a credibilidade caiu.');
-  else if (r.credD >= 2) bullets.push('A decisão foi bem recebida e a credibilidade subiu.');
+  const s = G.s, p = r.parts, last = G.idx >= 8 || !!r.over, dS = r.dS;
+  const facts = [];
+  const di = s.ipca - prev.ipca, de = s.exp - prev.exp, dg = s.gap - prev.gap;
+  facts.push([`O IPCA em 12 meses ${di > 0.02 ? 'subiu' : di < -0.02 ? 'caiu' : 'ficou estável'} (${fmt(prev.ipca)}% → ${fmt(s.ipca)}%) e as expectativas ${de > 0.02 ? 'pioraram' : de < -0.02 ? 'melhoraram' : 'ficaram estáveis'} (${fmt(prev.exp)}% → ${fmt(s.exp)}%).`, false]);
+  facts.push([`A atividade ${dg > 0.15 ? 'ganhou ritmo' : dg < -0.15 ? 'perdeu ritmo' : 'seguiu estável'}, e o desemprego está em ${fmt(s.unemp, 1)}%.`, false]);
+  if (Math.abs(r.dfx) > 2) facts.push([`O dólar ${r.dfx > 0 ? 'subiu' : 'caiu'} ${fmt(Math.abs(r.dfx), 1)}% e fechou a R$ ${fmt(s.fx)}.`, false]);
+  if (r.resisted) facts.push(['Você resistiu à pressão política com as expectativas desancoradas. O mercado notou.', true]);
+  else if (sc.pressure === 'cut' && dS < 0 && prev.exp > META + 0.6) facts.push(['Cortar sob pressão política, com a inflação esperada acima da meta, custou credibilidade.', true]);
+  if (r.credD <= -3) facts.push(['A decisão foi mal recebida pelo mercado e a credibilidade caiu.', true]);
+  else if (r.credD >= 2) facts.push(['A decisão foi bem recebida e a credibilidade subiu.', true]);
+  if (r.label) facts.unshift([`Dilema: você optou por "${r.label}".`, true]);
+  const chip = dS === 0 ? ['flat', 'Selic mantida'] : dS > 0 ? ['up', 'Alta de ' + fmt(dS) + ' p.p.'] : ['down', 'Corte de ' + fmt(-dS) + ' p.p.'];
+  const closer = (a, b) => Math.abs(a - META) < Math.abs(b - META);
+  const mini = (label, a, b, pl) => `<div class="stat"><div class="l">${label}</div><div class="v"><span>${b}</span>${pl}</div><div class="d"><span class="arrow">antes: ${a}</span></div></div>`;
+  const bar = (name, v, max) => `<div class="bar"><span>${name}</span><i style="--w:${(v / max * 100).toFixed(0)}%"></i><b>${Math.round(v)}/${max}</b></div>`;
   app.innerHTML = `
   <div class="grid">
     <section class="card out">
-      <h2>Comunicado do Copom</h2>
-      <p style="color:var(--muted);margin:0">${sc.titulo}</p>
-      <ul>${bullets.map(b => `<li>${b}</li>`).join('')}</ul>
-      <div class="pts">
-        <div class="pt"><b>${Math.round(p.total)}</b>pontos na reunião</div>
-        <div class="pt"><b>${Math.round(p.inf)}/40</b>inflação</div>
-        <div class="pt"><b>${Math.round(p.act)}/30</b>atividade</div>
-        <div class="pt"><b>${Math.round(p.cr)}/20</b>credibilidade</div>
-        <div class="pt"><b>${Math.round(p.st)}/10</b>câmbio</div>
+      <p style="color:var(--muted);margin:0 0 8px">Comunicado do Copom · ${sc.titulo}</p>
+      <div class="verdict"><span class="vn">${fmt(s.selic)}%</span><span class="chip ${chip[0]}">${chip[1]}</span></div>
+      ${r.over ? `<div class="alert"><b>Mandato encerrado.</b> ${OVER_TXT[r.over]}</div>` : ''}
+      <ul class="facts">${facts.map(f => `<li class="${f[1] ? 'hl' : ''}">${f[0]}</li>`).join('')}</ul>
+      <div class="scorebox">
+        <div class="bigpts"><span id="bp" data-pts="${Math.round(p.total)}">0</span><small>pontos nesta reunião</small></div>
+        <div class="bars">${bar('Inflação', p.inf, 40)}${bar('Atividade', p.act, 30)}${bar('Credibilidade', p.cr, 20)}${bar('Câmbio', p.st, 10)}</div>
       </div>
-      <button class="btn primary" id="next">${last ? 'Ver resultado final' : 'Próxima reunião'}</button>
+      <button class="btn primary" id="next" type="button">${last ? 'Ver resultado final' : 'Ir para a próxima reunião'}</button>
     </section>
-    <div>
-      <table class="table card" style="display:table"><thead><tr><th>Indicador</th><th>Antes</th><th>Depois</th></tr></thead><tbody>
-        <tr><td>Selic</td><td>${fmt(prev.selic)}%</td><td>${fmt(s.selic)}%</td></tr>
-        <tr><td>IPCA 12m</td><td>${fmt(prev.ipca)}%</td><td>${fmt(s.ipca)}%</td></tr>
-        <tr><td>Focus</td><td>${fmt(prev.exp)}%</td><td>${fmt(s.exp)}%</td></tr>
-        <tr><td>PIB 12m</td><td>${fmt(pib(prev), 1)}%</td><td>${fmt(pib(s), 1)}%</td></tr>
-        <tr><td>Desemprego</td><td>${fmt(prev.unemp, 1)}%</td><td>${fmt(s.unemp, 1)}%</td></tr>
-        <tr><td>Dólar</td><td>R$ ${fmt(prev.fx)}</td><td>R$ ${fmt(s.fx)}</td></tr>
-        <tr><td>Credibilidade</td><td>${Math.round(prev.cred)}</td><td>${Math.round(s.cred)}</td></tr>
-      </tbody></table>
+    <div class="imini">
+      ${mini('IPCA 12m', fmt(prev.ipca) + '%', fmt(s.ipca) + '%', pill(di, closer(s.ipca, prev.ipca), 2, ' p.p.'))}
+      ${mini('Focus', fmt(prev.exp) + '%', fmt(s.exp) + '%', pill(de, closer(s.exp, prev.exp), 2, ' p.p.'))}
+      ${mini('PIB 12m', fmt(pib(prev), 1) + '%', fmt(pib(s), 1) + '%', pill(pib(s) - pib(prev), pib(s) >= pib(prev), 1, ' p.p.'))}
+      ${mini('Desemprego', fmt(prev.unemp, 1) + '%', fmt(s.unemp, 1) + '%', pill(s.unemp - prev.unemp, s.unemp <= prev.unemp, 1, ' p.p.'))}
+      ${mini('Dólar', 'R$ ' + fmt(prev.fx), 'R$ ' + fmt(s.fx), pill(s.fx - prev.fx, s.fx <= prev.fx, 2))}
+      ${mini('Credibilidade', Math.round(prev.cred), Math.round(s.cred), pill(s.cred - prev.cred, s.cred >= prev.cred, 0))}
     </div>
   </div>`;
+  animateNum($('#bp'), Math.round(p.total), v => String(Math.round(v)), 700);
   $('#next').onclick = () => last ? renderFinal() : renderRound();
   window.scrollTo({ top: 0 });
 }
 
-function shareText(f, g) {
-  const s = G.s;
-  return `🏦 Fui presidente do Banco Central no "Copom: você decide" e fiz ${f.score} pontos (${g}).\nSelic final: ${fmt(s.selic)}% · IPCA: ${fmt(s.ipca)}% · Desemprego: ${fmt(s.unemp, 1)}%\nConsegue me superar? Desafio #${G.seed}: ${shareLink()}`;
-}
+// ---------- compartilhar ----------
 function shareLink() {
   const base = location.protocol === 'file:' ? '(link do jogo)' : location.origin + location.pathname;
   return base + '?seed=' + G.seed + (G.veteran ? '&vet=1' : '');
+}
+function shareText(f, g) {
+  const s = G.s;
+  return `🏦 Fui presidente do Banco Central no "Copom: você decide" e fiz ${f.score} pontos (${g}).\nSelic final: ${fmt(s.selic)}% · IPCA: ${fmt(s.ipca)}% · Desemprego: ${fmt(s.unemp, 1)}%\nConsegue me superar? Desafio #${G.seed}: ${shareLink()}`;
 }
 
 function cardImage(f, g) {
@@ -588,49 +890,66 @@ function cardImage(f, g) {
   const x = c.getContext('2d'), s = G.s;
   const sans = "Archivo, 'Helvetica Neue', Arial, sans-serif";
   x.fillStyle = '#0F5C57'; x.fillRect(0, 0, 1080, 1350);
-  x.fillStyle = '#E6ECE2'; x.fillRect(48, 48, 984, 1254);
-  x.fillStyle = '#13292B'; x.font = `800 44px ${sans}`; x.fillText('Copom: você decide', 96, 140);
+  x.fillStyle = '#E9EEE4'; x.fillRect(48, 48, 984, 1254);
+  x.fillStyle = '#12282A'; x.font = `800 44px ${sans}`; x.fillText('Copom: você decide', 96, 140);
   x.fillStyle = '#D9A21B'; x.fillRect(96, 170, 160, 10);
-  x.fillStyle = '#13292B'; x.font = `900 280px ${sans}`; x.fillText(String(f.score), 90, 470);
-  x.font = `800 60px ${sans}`; x.fillText(g, 96, 570);
-  x.font = `400 34px ${sans}`; x.fillStyle = '#587072'; x.fillText('pontos de 1000' + (G.veteran ? ' · modo veterano' : ''), 96, 625);
+  x.fillStyle = '#12282A'; x.font = `900 260px ${sans}`; x.fillText(String(f.score), 90, 450);
+  x.font = `800 60px ${sans}`; x.fillText(g, 96, 560);
+  x.font = `400 34px ${sans}`; x.fillStyle = '#546D6E'; x.fillText('pontos de 1000' + (G.veteran ? ' · modo veterano' : ''), 96, 615);
+  // mini gráfico da Selic
+  const sel = G.series.map(r => r.selic), mn = Math.min(...sel) - 1, mx = Math.max(...sel) + 1;
+  const X = i => 96 + i * (888 / (sel.length - 1)), Y = v => 720 - ((v - mn) / (mx - mn)) * 70;
+  x.strokeStyle = '#0F5C57'; x.lineWidth = 6; x.lineJoin = 'round'; x.beginPath();
+  sel.forEach((v, i) => i ? x.lineTo(X(i), Y(v)) : x.moveTo(X(i), Y(v))); x.stroke();
+  x.fillStyle = '#D9A21B'; x.beginPath(); x.arc(X(sel.length - 1), Y(sel[sel.length - 1]), 10, 0, 7); x.fill();
+  x.fillStyle = '#546D6E'; x.font = `500 26px ${sans}`; x.fillText('Selic ao longo do mandato', 96, 750);
   const rows = [['Selic final', fmt(s.selic) + '%'], ['IPCA em 12 meses', fmt(s.ipca) + '%'], ['Expectativa Focus', fmt(s.exp) + '%'], ['Desemprego', fmt(s.unemp, 1) + '%'], ['Credibilidade', Math.round(s.cred) + '/100']];
   rows.forEach((r, i) => {
-    const y = 740 + i * 95;
-    x.fillStyle = '#C5D1C3'; x.fillRect(96, y + 30, 888, 3);
-    x.fillStyle = '#13292B'; x.font = `500 38px ${sans}`; x.fillText(r[0], 96, y);
-    x.font = `800 44px ${sans}`; x.textAlign = 'right'; x.fillText(r[1], 984, y); x.textAlign = 'left';
+    const y = 840 + i * 80;
+    x.fillStyle = '#C9D4C7'; x.fillRect(96, y + 26, 888, 3);
+    x.fillStyle = '#12282A'; x.font = `500 36px ${sans}`; x.fillText(r[0], 96, y);
+    x.font = `800 42px ${sans}`; x.textAlign = 'right'; x.fillText(r[1], 984, y); x.textAlign = 'left';
   });
-  x.fillStyle = '#13292B'; x.font = `700 36px ${sans}`; x.fillText('Desafio #' + G.seed + ' · consegue me superar?', 96, 1250);
+  x.fillStyle = '#12282A'; x.font = `700 36px ${sans}`; x.fillText('Desafio #' + G.seed + ' · consegue me superar?', 96, 1260);
   return c;
 }
 
+// ---------- resultado final ----------
 function renderFinal() {
   G.phase = 'final'; drawTicks();
-  const f = finalize(G.hist, G.veteran), g = grade(f.score), s = G.s;
+  const f = finalize(G.hist, G.veteran, G.over), g = grade(f.score, G.over), s = G.s;
   const inBand = G.hist.filter(h => h.ipca >= BANDA_MIN && h.ipca <= BANDA_MAX).length;
   app.innerHTML = `
   <div class="final">
     <section class="card">
-      <h2 style="font-size:22px;margin-bottom:6px">Fim do mandato</h2>
-      <div class="score" id="sc">${f.score}</div>
+      <h2 style="font-size:22px;margin-bottom:6px">${G.over ? 'Mandato interrompido' : 'Fim do mandato'}</h2>
+      ${G.over ? `<div class="alert">${OVER_TXT[G.over]} Você ficou ${G.hist.length} de 8 reuniões no cargo.</div>` : ''}
+      <div class="score" id="sc" data-score="${f.score}">0</div>
       <div class="grade">${g}</div>
       <p style="color:var(--muted);margin:0">de 1000 pontos${G.veteran ? ' (com bônus do modo veterano)' : ''} · desafio #${G.seed}</p>
+      <details class="gloss" style="margin:10px 0"><summary>Como sua nota foi calculada</summary><dl>
+        <dt>Desempenho nas reuniões: ${Math.round(f.avg * 10)}</dt><dd>Média ponderada das notas de cada reunião. As últimas pesam mais que as primeiras.</dd>
+        <dt>Estado final da economia: ${f.bonus > 0 ? '+' : ''}${Math.round(f.bonus)}</dt><dd>Bônus por terminar com inflação e expectativas na meta e credibilidade alta. Penalidades por inflação fora da banda, desemprego alto e reuniões fora da banda.</dd>
+        ${G.over ? '<dt>Perda do cargo: nota reduzida em 40%</dt><dd>Sair antes do fim do mandato custa caro.</dd>' : ''}${G.veteran ? '<dt>Modo veterano: +10%</dt><dd>Bônus por jogar sem parecer técnico.</dd>' : ''}
+      </dl></details>
       <div class="badges">${f.badges.map(b => `<span class="badge" title="${esc(b[1])}">${b[0]}</span>`).join('') || '<span style="color:var(--muted)">Nenhuma conquista desta vez.</span>'}</div>
       <div class="actions">
-        <button class="btn primary" id="share">Compartilhar</button>
-        <button class="btn" id="img">Baixar imagem</button>
-        <button class="btn" id="again">Jogar de novo</button>
+        <button class="btn primary" id="share" type="button">Compartilhar resultado</button>
+        <button class="btn" id="img" type="button">Baixar imagem</button>
+        <button class="btn" id="again" type="button">Jogar de novo</button>
       </div>
-      <div class="seedrow" style="margin-top:18px"><input id="nm" maxlength="20" placeholder="Seu nome para o ranking" aria-label="Seu nome"><button class="btn" id="save">${GLOBAL ? 'Enviar ao ranking' : 'Salvar'}</button></div>
+      <div class="seedrow" style="margin-top:18px"><input id="nm" maxlength="20" placeholder="Seu nome para o ranking" aria-label="Seu nome"><button class="btn" id="save" type="button">${GLOBAL ? 'Enviar ao ranking' : 'Salvar'}</button></div>
       <div id="gb" style="margin-top:20px"></div><div id="rk">${rankHtml(null)}</div>
     </section>
     <section>
       <div class="stats">
         ${statCard('Selic final', fmt(s.selic) + '%', 'começou em 13,75%')}
-        ${statCard('IPCA final', fmt(s.ipca) + '%', inBand + ' de 8 reuniões dentro da banda', s.ipca <= BANDA_MAX && s.ipca >= BANDA_MIN ? 'ok' : 'bad')}
-        ${statCard('Expectativa final', fmt(s.exp) + '%', 'meta de 3%')}
+        ${statCard('IPCA final', fmt(s.ipca) + '%', inBand + ' de ' + G.hist.length + ' reuniões dentro da banda', { cls: s.ipca <= BANDA_MAX && s.ipca >= BANDA_MIN ? 'ok' : 'bad', meter: meter(s.ipca, 0, 8, [BANDA_MIN, BANDA_MAX], META) })}
+        ${statCard('Expectativa final', fmt(s.exp) + '%', 'meta de 3%', { meter: meter(s.exp, 0, 8, [BANDA_MIN, BANDA_MAX], META) })}
         ${statCard('Desemprego final', fmt(s.unemp, 1) + '%', 'começou em 5,8%')}
+      </div>
+      <div class="card chartcard"><h3>Nota por reunião e direção da Selic</h3>
+        <div class="tl" style="grid-template-columns:repeat(${G.hist.length},1fr)">${G.hist.map((h, i) => `<div class="tlc"><span class="tla ${h.dS > 0 ? 'up' : h.dS < 0 ? 'down' : ''}">${h.dS > 0 ? '▲' : h.dS < 0 ? '▼' : '–'}</span><div class="tlb" style="height:${Math.max(6, h.parts.total * 0.8).toFixed(0)}px"></div><span>${i + 1}</span></div>`).join('')}</div>
       </div>
       <div class="card chartcard"><h3>Sua Selic</h3>${chart([G.series.map(r => r.selic)], 'selic', 2, 25)}</div>
       <div class="card chartcard"><h3>Inflação e expectativas</h3>${chart([G.series.map(r => r.ipca), G.series.map(r => r.exp)], 'infl', 0, 10, [BANDA_MIN, BANDA_MAX])}</div>
@@ -639,6 +958,7 @@ function renderFinal() {
       </tbody></table>
     </section>
   </div>`;
+  animateNum($('#sc'), f.score, v => String(Math.round(v)), 1100);
   if (GLOBAL) mountBoard($('#gb'), 'Ranking global', [{ label: 'Este desafio #' + G.seed, seed: G.seed }, { label: 'Geral', seed: null }]);
   $('#again').onclick = renderStart;
   $('#share').onclick = async () => {
